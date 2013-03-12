@@ -2,7 +2,7 @@
 # Description:
 
 class Player:
-    def getCmd(self):
+    def get_cmd(self):
         pass
 
 class AIPlayer(Player):

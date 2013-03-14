@@ -4,10 +4,15 @@
 class World:
     def __init__(self, width, height):
         self.field = grids.Field(width, height)
+        self.players = []
+        self.snakes = []
 
-    def get_field(self):
-        return self.field
+    # We don't need getter and setter in python
+    # def get_field(self):
+    #     return self.field
 
-    def get_body(self)
-        # return a list of (x, y) with length snake.INITIAL_LEN
+    def add_player(self, player):
+        """
+        Add the player into the world.
+        """
         pass

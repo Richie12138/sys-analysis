@@ -30,7 +30,6 @@ class Snake(object):
         @player: the player (player.Player) controling the snake
         """
         self.world = world
-        # self.field = world.get_field()
         self.player = player
 
         self.body = []
@@ -139,7 +138,7 @@ class Snake(object):
             nextPos, sec.pos = self.pos, nextPos
         # snake moved
         headPos = self.head.pos
-        grid = self.field.get_grid_at(headPos)
+        grid = self.world.field.get_grid_at(headPos)
         # test if the grid is empty
         gameEvents = []
         if grid.is_empty():

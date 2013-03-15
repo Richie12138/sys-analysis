@@ -1,9 +1,6 @@
 import pygame
 
-class Display:
-    pass
-
-class DefaultDisplay(Display):
+class Display(Display):
     def __init__(self, width=500, height=500, blk_size=10):
     """
     Initialize display.

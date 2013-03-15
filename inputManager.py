@@ -3,14 +3,14 @@ import pygame
 from player import Player
 
 
-class inputManager:
-	'''Inputmanager maintain a list of currentPressed Key as a stack
+class InputManager:
+	'''InputManager maintains a list of current-pressed keys as a stack
 	and guarantee there's no duplicate
 	'''
 	def __init__(self):
 		self.currentKeyPressed = []
 
-	def key_listener(self):
+	def update(self):
 		'''
 		Listen to the key event in the pygame.event.
 		'''

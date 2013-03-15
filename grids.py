@@ -4,12 +4,12 @@
 # import blablab
 
 class Grid(cocos.sprite.Sprite):
-    def __init__(self, x, y):
-        this.x, this.y = x, y
+    def __init__(self, w, h):
+        this.w, this.h = w, h
         this.lock = sync.Lock()
 
 class Field:
     def __init__(self, width, height):
         pass
-    def getGridAt(self, x, y):
+    def get_grid_at(self, x, y):
         pass

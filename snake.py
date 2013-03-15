@@ -27,7 +27,7 @@ class Snake(object):
         Snake in the game logic. 
         parameters:
         @world: the World (world.World) object where the snake lies
-        @player: the player (player.Player) controling the snake
+        @player: the player (player.Player) controlling the snake
         """
         self.world = world
         self.player = player

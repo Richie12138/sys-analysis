@@ -6,25 +6,19 @@
 
 import snake
 
-"""
-represent the grid status
-"""
+# represent the grid status
 BLANK   =   0
 SNAKE   =   1
 FOOD    =   2 
 
 class Grid:
     def __init__(self, x, y):
-        """ 
-        @postion: a turple
-        @status: the type
-        """
+        #postion: a turple
+        #status: the type
         self.position = (x, y)
         self.status = BLANK
 
-    """
-    status detect. maybe some are not neccessary
-    """
+    # status detect. maybe some are not neccessary
     def set_empty(self):
         self.status = BLANK
 
@@ -57,10 +51,9 @@ class Grid:
         print "Grid position: %s \nGrid status: %d \n" % (self.position, self.status)
 
 class Field:
-    """
-    @grids: mapping for the field
-    """
+    #grids: mapping for the field
     fields = {}
+
     def __init__(self, width, height):
         self.width = width
         self.height = height
@@ -71,9 +64,7 @@ class Field:
             for y in xrange(0, height):
                 self.fields[(x, y)] = Grid(x, y)
 
-    """
-    generate grids by different roles
-    """
+    #generate grids by different roles
     def gen_snake_grids(self, snake):
         for pos in snake.positions:
             self.fields[pos].set_snake()

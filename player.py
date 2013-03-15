@@ -2,6 +2,8 @@ import cocos
 from cocos.director import director
 import pyglet
 
+# macros to indicate directions
+MOVE[K_UP, K_DOWN, K_LEFT, K_RIGHT] = [1, 2, 3, 4]
 
 class KeyControl(cocos.layer.Layer):
 	'''KeyControl was used to listen to the key event
@@ -29,18 +31,34 @@ class KeyControl(cocos.layer.Layer):
 
 		
 class Player():
-	# keyLayout referred to the Players keyBoard layout for the game
+	# keyLayout referred to the player's keyboard layout
 	def __init__(self, keyLayout):
+    """
+    Initialize the player, including his keyboard layout
+    Parameters:
+    @keyLayout: a list of keys for up, down, left, right,
+                respectively.
+    """
+
 		self.keyLayout = keyLayout
-		self.currentKey = ""
+		self.currentMove = None
 
 	def get_cmd(self, currentKeyPressed):
-		self.currentKey = ""
+    """
+    Return the command issued by the player.
+    All possible return values are defined in
+    the MOVE macro.
+    Parameters:
+    @currentKeyPressed: a list of key pressed
+    """
+
 		for key in currentKeyPressed:
-			if key in self.keyLayout:
-				self.currentKey = key
+            for i in range(len(keyLayout)):
+                if keyLayout[i] == key:
+                    self.currentMove = MOVE[i]
 				break
-		return self.currentKey
+		return self.currentMove
+"""
 #Test
 # ===========================================
 class World(cocos.layer.Layer):
@@ -76,4 +94,4 @@ if __name__ == "__main__":
 	while True:
 		director.run( cocos.scene.Scene(keyControl,world ) )
 
-
+"""

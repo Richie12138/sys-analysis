@@ -10,7 +10,10 @@ class Game:
     """
     TODO
     """
-    def __init__(self, configData):
+    def __init__(self):
+        pass
+
+    def setup_stage(self, configData):
         """
         Setups the game stage.
         @configData: 
@@ -56,5 +59,6 @@ class Game:
 if __name__ == "__main__":
     configData = {"world-size":(10,10),
                     "players":[]}
-    game = Game(configData)
+    game = Game()
+    game.setup_stage(configData)
     game.mainloop(Display())

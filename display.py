@@ -3,7 +3,7 @@ import world
 import grids
 
 class Display:
-    def __init__(self, width=500, height=500, blk_size=10):
+    def __init__(self, width=500, height=500, blkSize=10):
         """
         Initialize display.
         @width: width of the stage
@@ -12,7 +12,7 @@ class Display:
         self.window = pygame.display.set_mode((width, height))
         self.width = width
         self.height = height
-        self.blk_size = blk_size
+        self.blkSize = blkSize
 
     def render(self, world):
         """
@@ -28,8 +28,8 @@ class Display:
         #
         # Place the field in the screen
         # The field should be smaller than the screen
-        self.field_x = (self.width-field.width*self.blk_size)/2
-        self.field_y = (self.height-field.height*self.blk_size)/2
+        self.fieldX = (self.width-field.width*self.blkSize)/2
+        self.fieldY = (self.height-field.height*self.blkSize)/2
 
         for x in range(field.width):
             for y in range(field.height):
@@ -38,31 +38,30 @@ class Display:
                 if field.get_grid_at(x, y).type == grids.BLANK:
                     pygame.draw.rect(self.window,
                                 (200, 200, 200),
-                                (self.field_x+x*self.blk_size,
-                                    self.field_y+y*self.blk_size,
-                                    self.blk_size-1,
-                                    self.blk_size-1))
+                                (self.fieldX+x*self.blkSize,
+                                    self.fieldY+y*self.blkSize,
+                                    self.blkSize-1,
+                                    self.blkSize-1))
                 #
                 # yellow for snake
                 elif field.get_grid_at(x, y).type == grids.SNAKE:
                     pygame.draw.rect(self.window,
                                 (255, 255, 0),
-                                (self.field_x+x*self.blk_size,
-                                    self.field_y+y*self.blk_size,
-                                    self.blk_size-1,
-                                    self.blk_size-1))
+                                (self.fieldX+x*self.blkSize,
+                                    self.fieldY+y*self.blkSize,
+                                    self.blkSize-1,
+                                    self.blkSize-1))
                 #
                 # red for food
                 elif field.get_grid_at(x, y).type == grids.FOOD:
                     pygame.draw.rect(self.window,
                                 (255, 255, 0),
-                                (self.field_x+x*self.blk_size,
-                                    self.field_y+y*self.blk_size,
-                                    self.blk_size-1,
-                                    self.blk_size-1))
+                                (self.fieldX+x*self.blkSize,
+                                    self.fieldY+y*self.blkSize,
+                                    self.blkSize-1,
+                                    self.blkSize-1))
                     print x, y
                     
-                pass
         pygame.display.flip()
 
     def quit(self):
@@ -70,6 +69,6 @@ class Display:
 
 if __name__ == "__main__":
     world = world.World(10, 10)
-    display = Display(blk_size=10)
+    display = Display(blkSize=10)
     while True:
         display.render(world)

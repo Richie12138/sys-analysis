@@ -5,17 +5,19 @@ class Player():
 	# keyLayout referred to the player's keyboard layout
 	def __init__(self, keyLayout):
 		"""
-	Initialize the player, including his keyboard layout
-	Parameters:
-	@keyLayout: a list of keys for up, down, left, right,
-				respectively.
-	"""
+        Initialize the player, including his keyboard layout
+        Parameters:
+        @keyLayout: a list of keys for up, down, left, right,
+                    respectively.
+        """
 		self.keyLayout = keyLayout
 		self.currentMove = None
 
 	def update(self, currentKeyPressed):
-		"""@currentKeyPressed: a list of key pressed
-		First_step: get_cmd from the currentKeyPressed list and update its currentMove """
+		"""
+        Update the player's command.
+        @currentKeyPressed: a list of key pressed
+        """
 
 		self.currentMove = None
 		for key in currentKeyPressed:

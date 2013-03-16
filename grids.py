@@ -12,7 +12,8 @@ class Grid:
         #postion: a turple
         #status: the type
         self.position = (x, y)
-        self.content = BLANK
+        self.type = BLANK
+        self.content = None
 
     def print_self(self):
         print "Grid position: %s \nGrid status: %d \n" % (self.position, self.status)

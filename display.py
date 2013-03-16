@@ -35,7 +35,7 @@ class Display:
             for y in range(field.height):
                 #
                 # grey for blank grids
-                if field.get_grid_at(x, y).content == grids.BLANK:
+                if field.get_grid_at(x, y).type == grids.BLANK:
                     pygame.draw.rect(self.window,
                                 (200, 200, 200),
                                 (self.field_x+x*self.blk_size,
@@ -44,7 +44,7 @@ class Display:
                                     self.blk_size-1))
                 #
                 # yellow for snake
-                elif field.get_grid_at(x, y).content == grids.SNAKE:
+                elif field.get_grid_at(x, y).type == grids.SNAKE:
                     pygame.draw.rect(self.window,
                                 (255, 255, 0),
                                 (self.field_x+x*self.blk_size,
@@ -53,7 +53,7 @@ class Display:
                                     self.blk_size-1))
                 #
                 # red for food
-                elif field.get_grid_at(x, y).content == grids.FOOD:
+                elif field.get_grid_at(x, y).type == grids.FOOD:
                     pygame.draw.rect(self.window,
                                 (255, 255, 0),
                                 (self.field_x+x*self.blk_size,

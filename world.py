@@ -9,8 +9,12 @@ class World:
         self.players = []
         self.snakes = []
 
-    def add_player(self, player):
-        """
-        Add the player into the world.
-        """
-        pass
+    def update(self):
+        for player in self.players:
+            player.update()
+
+        # TODO synchronization problem
+        for snake in self.snakes:
+            snake.update()
+
+        self.field.update()

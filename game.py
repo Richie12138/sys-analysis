@@ -75,7 +75,7 @@ class Game:
 
 if __name__ == "__main__":
     configData = {"world-size":(10,10),
-                    "human-players":[[['W','S','A','D']]],
+                    "human-players":[[['w','s','a','d']]],
                     "ai-players":[]}
     game = Game()
     game.setup_stage(configData)

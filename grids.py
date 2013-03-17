@@ -17,35 +17,7 @@ class Grid:
         #status: the type
         self.position = (x, y)
         self.status = BLANK
-
-    # status detect. maybe some are not neccessary
-    def set_empty(self):
-        self.status = BLANK
-
-    def is_empty(self):
-        return self.status == BLANK 
-
-    def set_snake(self):
-        self.status = SNAKE
-
-    def is_snake(self):
-        return self.status == SNAKE
-
-    def set_food(self):
-        self.status = FOOD
-
-    def is_food(self):
-        return self.status == FOOD
-
-    # test functions
-
-    def set_status(self, status):
-        # assume that 0 <= status <= 2 
-        if status >= 0 and status <= 2:
-            self.status = status
-            return True
-        else:
-            return False
+        self.content = None
 
     def print_self(self):
         print "Grid position: %s \nGrid status: %d \n" % (self.position, self.status)
@@ -64,12 +36,13 @@ class Field:
             for y in xrange(0, height):
                 self.fields[(x, y)] = Grid(x, y)
 
-    #generate grids by different roles
+    #generate grids by different snakes
     def gen_snake_grids(self, snake):
         for pos in snake.positions:
-            self.fields[pos].set_snake()
+            self.fields[pos].status = SNAKE
+            self.fields[pos].content = snake
 
-    def gen_food_grids(self):
+    def gen_food_grids(self, x, y):
         pass
 
     # get grid
@@ -96,3 +69,8 @@ if __name__ == '__main__':
     mysnake.gen_body((3, 1), snake.Directions.LEFT, 3)
     test_field.gen_snake_grids(mysnake)
     test_field.print_self()
+    t = test_field.get_grid_at(5,5)
+    t.set_content(mysnake)
+    print t.content
+    if isinstance(t.content, snake.Snake):
+        print 'yes'

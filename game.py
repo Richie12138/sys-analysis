@@ -1,7 +1,7 @@
 # Author:
 # Description:
 
-from snake import Snake
+from snake import Snake, Directions
 from world import World
 from player import HumanPlayer
 from display import Display
@@ -31,12 +31,14 @@ class Game:
             player = HumanPlayer(*playerData, 
                 inputManager=self.inputManager)
             snake = Snake(world, player)
+            snake.gen_body((3, 1), Directions.LEFT, 3)
             world.players += [player]
             world.snakes += [snake]
 
         for playerData in configData['ai-players']:
             player = AIPlayer(*playerData)
             snake = Snake(world, player)
+            snake.gen_body((0, 0), Directions.LEFT, 3)
             world.players += [player]
             world.snakes += [snake]
 

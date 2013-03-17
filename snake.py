@@ -4,7 +4,7 @@ some can be used to display.
 
 Author: Ray
 """
-import events
+from events import *
 import grids
 
 class Directions:
@@ -56,6 +56,7 @@ class Snake(object):
 
         @return: None
         """
+        self.direction = direction
         dx, dy = direction
         positions = [headPos]
         x, y = headPos
@@ -132,23 +133,27 @@ class Snake(object):
 
         @return a list of emitted events during the update.
         """
+        print self.direction
         dx, dy = self.direction
         x0, y0 = self.head.pos
         nextPos = x0 + dx, y0 + dy
         for sec in self.body:
-            nextPos, sec.pos = self.pos, nextPos
+            nextPos, sec.pos = self.head.pos, nextPos
         # snake moved
         headPos = self.head.pos
-        grid = self.world.field.get_grid_at(headPos)
+        grid = self.world.field.get_grid_at(*headPos)
+        if grid is None:
+            print 'Died'
+            return None
         # test if the grid is empty
         gameEvents = []
-        if grid.type == BLANK:
+        if grid.type == grids.BLANK:
             gameEvents.append(GameEvent(
                 type=SNAKE_MOVE, 
                 target=self,
                 ))
         # test if the grid has food
-        elif grid.get_food():
+        elif grid.type == grids.FOOD:
             gameEvents.append(GameEvent(
                 type=SNAKE_EAT,
                 target=self,

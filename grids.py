@@ -19,12 +19,11 @@ class Grid:
         print "Grid position: %s \nGrid status: %d \n" % (self.position, self.status)
 
 class Field:
-    #grids: mapping for the field
-    fields = {}
 
     def __init__(self, width, height):
         self.width = width
         self.height = height
+        self.fields = {}
         self.gen_empty_grids(width, height)
 
     def gen_empty_grids(self, width, height):
@@ -43,7 +42,10 @@ class Field:
 
     # get grid
     def get_grid_at(self, x, y):
-        return self.fields[(x, y)]
+        try:
+            return self.fields[(x, y)]
+        except KeyError:
+            return None
 
     # will be added by needs
     def update(self):

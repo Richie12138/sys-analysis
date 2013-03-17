@@ -13,6 +13,7 @@ class Display:
         self.width = width
         self.height = height
         self.blkSize = blkSize
+        self.clock = pygame.time.Clock()
 
     def render(self, world):
         """
@@ -62,6 +63,7 @@ class Display:
                                     self.blkSize-1))
                     print x, y
                     
+        self.clock.tick(1)
         pygame.display.flip()
 
     def quit(self):

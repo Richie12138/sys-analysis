@@ -38,7 +38,7 @@ class Game:
         for playerData in configData['ai-players']:
             player = AIPlayer(*playerData)
             snake = Snake(world, player)
-            snake.gen_body((0, 0), Directions.LEFT, 3)
+            snake.gen_body((0, 0), Directions.RIGHT, 3)
             world.players += [player]
             world.snakes += [snake]
 

@@ -26,8 +26,9 @@ class HumanPlayer(Player):
         self.currentMove = None
         for key in self.inputManager.currentKeyPressed:
             if key in self.keyLayout:
-                    self.currentMove = MOVE[self.keyLayout.index(key)]
-                    break
+                self.currentMove = MOVE[self.keyLayout.index(key)]
+                break
+        print self.currentMove
 
 class AIPlayer(Player):
     pass

@@ -3,15 +3,16 @@
 
 from snake import Snake
 from world import World
-from player import Player
+from player import HumanPlayer
 from display import Display
+from inputManager import InputManager
 
 class Game:
     """
     TODO
     """
     def __init__(self):
-        pass
+        self.inputManager = InputManager()
 
     def setup_stage(self, configData):
         """
@@ -26,10 +27,19 @@ class Game:
             
         """
         world = World(*configData['world-size'])
-        for playerData in configData['players']:
-            player = Player(playerData)
+        for playerData in configData['human-players']:
+            player = HumanPlayer(*playerData, 
+                inputManager=self.inputManager)
             snake = Snake(world, player)
-            world.add_player(player)
+            world.players += [player]
+            world.snakes += [snake]
+
+        for playerData in configData['ai-players']:
+            player = AIPlayer(*playerData)
+            snake = Snake(world, player)
+            world.players += [player]
+            world.snakes += [snake]
+
         self.world = world
 
     def bind_event(self, eventType, callback):
@@ -50,7 +60,10 @@ class Game:
         self._quit = False
         while not self._quit:
             # handle input
+            self.inputManager.update()
+
             # update game state
+            self.world.update()
 
             # render using display
             display.render(self.world)
@@ -58,7 +71,8 @@ class Game:
 
 if __name__ == "__main__":
     configData = {"world-size":(10,10),
-                    "players":[]}
+                    "human-players":[[['W','S','A','D']]],
+                    "ai-players":[]}
     game = Game()
     game.setup_stage(configData)
     game.mainloop(Display())

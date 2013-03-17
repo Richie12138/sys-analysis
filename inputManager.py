@@ -16,9 +16,10 @@ class InputManager:
 		'''
 		for event in pygame.event.get():
 			if event.type == KEYDOWN:
-				#duplicate are not allowed
+				#duplicate are n)ot allowed
 				if event.key not in self.currentKeyPressed:
-					self.currentKeyPressed.insert(0,event.key)
+					self.currentKeyPressed = \
+                        [event.key]+self.currentKeyPressed
 
 			elif event.type == KEYUP:
 				if event.key in self.currentKeyPressed:

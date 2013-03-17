@@ -5,6 +5,7 @@ some can be used to display.
 Author: Ray
 """
 import events
+import grids
 
 class Directions:
     LEFT = (-1, 0)
@@ -141,7 +142,7 @@ class Snake(object):
         grid = self.world.field.get_grid_at(headPos)
         # test if the grid is empty
         gameEvents = []
-        if grid.is_empty():
+        if grid.type == BLANK:
             gameEvents.append(GameEvent(
                 type=SNAKE_MOVE, 
                 target=self,

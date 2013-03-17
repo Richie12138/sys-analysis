@@ -16,5 +16,5 @@ class World:
         # TODO synchronization problem
         for snake in self.snakes:
             snake.update()
+            self.field.update(snake)
 
-        self.field.update()

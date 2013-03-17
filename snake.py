@@ -133,12 +133,15 @@ class Snake(object):
 
         @return a list of emitted events during the update.
         """
-        print self.direction
+        print 'direction:', self.direction
         dx, dy = self.direction
         x0, y0 = self.head.pos
         nextPos = x0 + dx, y0 + dy
         for sec in self.body:
-            nextPos, sec.pos = self.head.pos, nextPos
+            x0, y0 = sec.pos
+            sec.pos = x0 + dx, y0 + dy
+            #modified by legend
+            #nextPos, sec.pos = self.head.pos, nextPos
         # snake moved
         headPos = self.head.pos
         grid = self.world.field.get_grid_at(*headPos)

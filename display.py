@@ -32,8 +32,8 @@ class Display:
         self.fieldX = (self.width-field.width*self.blkSize)/2
         self.fieldY = (self.height-field.height*self.blkSize)/2
 
-        for x in range(field.width):
-            for y in range(field.height):
+        for x in xrange(field.width):
+            for y in xrange(field.height):
                 #
                 # grey for blank grids
                 if field.get_grid_at(x, y).type == grids.BLANK:

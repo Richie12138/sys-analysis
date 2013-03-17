@@ -31,7 +31,8 @@ class Game:
             player = HumanPlayer(*playerData, 
                 inputManager=self.inputManager)
             snake = Snake(world, player)
-            snake.gen_body((3, 1), Directions.LEFT, 3)
+            snake.gen_body((3, 1), Directions.RIGHT, 3)
+            world.field.gen_snake_grids(snake)
             world.players += [player]
             world.snakes += [snake]
 
@@ -39,6 +40,7 @@ class Game:
             player = AIPlayer(*playerData)
             snake = Snake(world, player)
             snake.gen_body((0, 0), Directions.RIGHT, 3)
+            world.field.gen_snake_grids(snake)
             world.players += [player]
             world.snakes += [snake]
 

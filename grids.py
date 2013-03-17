@@ -24,18 +24,26 @@ class Field:
         self.width = width
         self.height = height
         self.fields = {}
-        self.gen_empty_grids(width, height)
+        self.gen_empty_grids()
 
-    def gen_empty_grids(self, width, height):
-        for x in xrange(0, width):
-            for y in xrange(0, height):
+    def clear_grids(self):
+        for x in xrange(0, self.width):
+            for y in xrange(0, self.height):
+                self.fields[(x, y)].type = BLANK
+
+    def gen_empty_grids(self):
+        for x in xrange(0, self.width):
+            for y in xrange(0, self.height):
                 self.fields[(x, y)] = Grid(x, y)
 
     #generate grids by different snakes
     def gen_snake_grids(self, snake):
-        for pos in snake.positions:
-            self.fields[pos].type = SNAKE
-            self.fields[pos].content = snake
+        try:
+            for pos in snake.positions:
+                self.fields[pos].type = SNAKE
+                self.fields[pos].content = snake
+        except KeyError:
+            print 'KeyError'
 
     def gen_food_grids(self, x, y):
         pass
@@ -48,13 +56,14 @@ class Field:
             return None
 
     # will be added by needs
-    def update(self):
-        pass
+    def update(self, snake):
+        self.clear_grids()
+        self.gen_snake_grids(snake)
 
     #test print
     def print_self(self):
-        for x in xrange(0, self.width):
-            for y in xrange(0, self.height):
+        for y in xrange(0, self.height):
+            for x in xrange(0, self.width):
                 print self.fields[(x, y)].type,
             print ''
 

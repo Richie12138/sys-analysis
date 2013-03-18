@@ -1,53 +1,57 @@
 import pygame
-from player import Player
-
+from player import HumanPlayer
 
 class InputManager:
-    '''InputManager maintains a list of current-pressed keys as a stack
-    and guarantee there's no duplicate
-    '''
     def __init__(self):
-        self.currentKeyPressed = []
+        self._callbacks = {}
+
+    def bind(self, eventType, callback):
+        """
+        bind the event and the corresponding callback in self._callbacks
+        Parameters:
+        @ eventType: a hashable tuple, included the event.type and event.key
+        @ callback: a callable function
+        """
+        if eventType not in self._callbacks:
+            #if eventType is not in _callbacks, initialize it
+            self._callbacks[eventType] = []
+        self._callbacks[eventType].append(callback)
+
+
+    def parse_event_type(self, e):
+        """
+        parse the event into a hashable object(a tuple)
+        Parameters:
+        @e: a pygame event(Here I gurantee that event.type was KEYDOWN or KEYUP)
+        """
+        return (e.type, e.key)
 
     def update(self):
-        '''
-        Listen to the key event in the pygame.event.
-        '''
-        self.currentKeyPressed = []
-
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                #duplicate are n)ot allowed
-                if event.unicode not in self.currentKeyPressed:
-                    self.currentKeyPressed = \
-                        [event.unicode]+self.currentKeyPressed
+        """
+        Listen to the key event in the pygame.event
+        """
+        for e in pygame.event.get():
+            if e.type == pygame.KEYDOWN or e.type == pygame.KEYUP:
+                type = self.parse_event_type(e)
+                if self._callbacks.has_key(type):
+                    callbacks = self._callbacks[type]
+                    #call the event's corresponding callbacks
+                    for callback in callbacks:
+                        callback(e)
 
 # Test
-# ===============================
-# if __name__ == "__main__":
-#   FPS = 30
-#   pygame.display.init()
-#   screen = pygame.display.set_mode((320, 640),0,32)
-#   clocks = pygame.time.Clock()
-# 
-#   player1 = Player((K_w, K_s, K_a, K_d))
-#   player2 = Player((K_UP, K_DOWN, K_LEFT, K_RIGHT))
-# 
-#   players = [player1, player2]
-#   input_manager = inputManager()
-# 
-#   while True:
-#       input_manager.key_listener()
-#       pygame.font.init()
-#       screen.fill((255,255,255,255))  
-#       xy = [5,5]
-#       fontr = pygame.font.SysFont("arial", 12)
-#       for i in xrange(0, len(players)):
-#           players[i].update(input_manager.currentKeyPressed)
-#       for i in xrange(0, len(players)):
-#           players[i].test(screen,i, xy, fontr)
-#           xy[1] += 35
-# 
-#       # clocks.tick(FPS)
-#       pygame.display.update()
-# 
+# ================================
+if __name__ == "__main__":
+    pygame.display.init()
+    screen = pygame.display.set_mode((320, 640),0,32)
+    clocks = pygame.time.Clock()
+    FPS = 30
+
+    mgr = InputManager()
+    player1 = HumanPlayer(mgr,[pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d])
+    player2 = HumanPlayer(mgr,[pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT])
+    while True:
+        mgr.update()
+        clocks.tick(FPS)
+        pygame.display.update()
+

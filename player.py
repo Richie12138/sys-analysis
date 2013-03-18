@@ -1,54 +1,57 @@
-# macros to indicate directions
-MOVE = [UP, DOWN, LEFT, RIGHT] = [0, 1, 2, 3] 
+import pygame
 
 class Player:
     pass
 
 class HumanPlayer(Player):
-    # keyLayout referred to the player's keyboard layout
-    def __init__(self, keyLayout, inputManager):
+    def __init__(self, mgr, keyLayout):
         """
         Initialize the player, including his keyboard layout
         Parameters:
         @keyLayout: a list of keys for up, down, left, right,
-                    respectively.
+                    respectively
+        @mgr: a instance of InputManager
         """
-        self.keyLayout = keyLayout
+        self.mgr = mgr
+        direction = ['UP', 'DOWN', 'LEFT', 'RIGHT']
+        self.keyLayout = {i:j for i, j in zip(keyLayout, direction)}
         self.currentMove = None
-        self.inputManager = inputManager
+        self.bind_keys(keyLayout) #bind its key event to the inputmanager
+        self.historyKeyPressed = [] #used to record the history of the currentKeypressed
 
-    def update(self):
+    def move(self, event):
         """
-        Update the player's command.
-        @currentKeyPressed: a list of key pressed
+        The callback of a player key event
+        Used to update the player's currentMove
+        Parameters:
+        @event: the event corresponding to the callback function
         """
+        if event.type == pygame.KEYDOWN:
+            self.currentMove = self.keyLayout[event.key]
+            self.historyKeyPressed.append(event.key)
 
-        self.currentMove = None
-        for key in self.inputManager.currentKeyPressed:
-            if key in self.keyLayout:
-                self.currentMove = MOVE[self.keyLayout.index(key)]
-                break
+        elif event.type == pygame.KEYUP:
+            #If it's a KEYUP, the withdraw a key from historyKeyPressed
+            self.historyKeyPressed.pop()
+            if len(self.historyKeyPressed):
+                self.currentMove = self.keyLayout[self.historyKeyPressed[-1]]
+            else:
+                self.currentMove = None
+
         print self.currentMove
+
+    def bind_keys(self, keyLayout):
+        """
+        Blind its keyLayout to the inputManager
+        Parameters:
+        @keyLayout: a list of keys for up, down, left, right,
+            respectively
+            eg: keyLayout = [K_w, K_s, K_a, K_d]
+        """
+        for key in keyLayout:
+            self.mgr.bind((pygame.KEYDOWN, key), self.move)
+            self.mgr.bind((pygame.KEYUP, key), self.move)
+
 
 class AIPlayer(Player):
     pass
-
-# Test
-# ========================================
-# 
-#   def test(self, screen, id, xy, fontr):
-#       """Test"""
-#       move = {UP: "up",
-#               DOWN:"down",
-#               LEFT: "left",
-#               RIGHT: "right"
-#           }
-# 
-#       if self.currentMove != None:
-#           action = move[self.currentMove]
-#       else:
-#           action = "None"
-# 
-#       info = "Player" + str(id) + " " +  action ;
-#       screen.blit(fontr.render("%s:" %(info),True,(0,0,0)),tuple(xy))
-# 

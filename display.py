@@ -9,11 +9,18 @@ class Display:
         @width: width of the stage
         @height: height of the stage
         """
+        pygame.display.init()
+        pygame.font.init()
         self.window = pygame.display.set_mode((width, height))
         self.width = width
         self.height = height
         self.blkSize = blkSize
-        self.clock = pygame.time.Clock()
+        # XXX: see comment near self.clock.tick
+        # self.clock = pygame.time.Clock()
+
+    def init(self, game):
+        # TODO: Bind handlers for gameEvents here.
+        pass
 
     def render(self, world):
         """
@@ -63,7 +70,8 @@ class Display:
                                     self.blkSize-1))
                     print x, y
                     
-        self.clock.tick(1)
+        # XXX: tick was migrated to game.py
+        # self.clock.tick(1)
         pygame.display.flip()
 
     def quit(self):

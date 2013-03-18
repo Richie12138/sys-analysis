@@ -7,6 +7,15 @@
 # represent the grid status
 BLANK, SNAKE, FOOD = 0, 1, 2
 
+class Directions:
+    LEFT = (-1, 0)
+    RIGHT = (1, 0)
+    UP = (0, -1)
+    DOWN = (0, 1)
+    # for iterating
+    all = (LEFT, RIGHT, UP, DOWN)
+
+
 class Grid:
     def __init__(self, x, y):
         #postion: a turple
@@ -37,6 +46,7 @@ class Field:
                 self.fields[(x, y)] = Grid(x, y)
 
     #generate grids by different snakes
+    #TODO: fix the behavior of this method
     def gen_snake_grids(self, snake):
         try:
             for pos in snake.positions:
@@ -60,12 +70,13 @@ class Field:
         self.clear_grids()
         self.gen_snake_grids(snake)
 
-    #test print
-    def print_self(self):
-        for y in xrange(0, self.height):
-            for x in xrange(0, self.width):
-                print self.fields[(x, y)].type,
-            print ''
+    def __repr__(self):
+        chars = {BLANK:'o', FOOD:'F', SNAKE:'S'}
+        lines = []
+        for y in xrange(self.height):
+            lines.append(''.join(
+                chars[self.fields[x,y].type] for x in xrange(self.width)))
+        return '\n'.join(lines)
 
 # test main function
 if __name__ == '__main__':
@@ -74,7 +85,7 @@ if __name__ == '__main__':
     player = None
     import snake
     mysnake = snake.Snake(world, player)
-    mysnake.gen_body((3, 1), snake.Directions.LEFT, 3)
+    mysnake.gen_body((3, 1), Directions.LEFT, 3)
     test_field.gen_snake_grids(mysnake)
     test_field.print_self()
     t = test_field.get_grid_at(5,5)

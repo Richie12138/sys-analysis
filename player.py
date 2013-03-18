@@ -11,13 +11,30 @@ class HumanPlayer(Player):
         @keyLayout: a list of keys for up, down, left, right,
                     respectively
         @mgr: a instance of InputManager
+
+        self Paramater:
+        @self.currentMove:
+            A string corresponding to 'UP', 'DOWN', 'LEFT', 'RIGHT'
+            refer to the Player currentMove direction
+        @self keyLayout:
+            A dict, which key its the key layout of the player
+            and the corresponding value is the direction to the key layout
+            eg:
+            { K_w: 'UP',
+              K_s: 'DOWN',
+              K_a: 'LEFT',
+              K_d: 'RIGHT'
+            }
+
+        @self.historyKeyPressed
+            A list used to record the history of the key still being pressed
         """
         self.mgr = mgr
         direction = ['UP', 'DOWN', 'LEFT', 'RIGHT']
         self.keyLayout = {i:j for i, j in zip(keyLayout, direction)}
         self.currentMove = None
         self.bind_keys(keyLayout) #bind its key event to the inputmanager
-        self.historyKeyPressed = [] #used to record the history of the currentKeypressed
+        self.historyKeyPressed = [] 
 
     def move(self, event):
         """

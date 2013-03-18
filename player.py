@@ -1,15 +1,26 @@
 import pygame
+from grids import Directions
+from debug import dprint
 
-class Player:
-    pass
+class Player(object):
+    def __init__(self, name):
+        self.name = name
+        self.snake = None
+        self.currentMove = None
+    def update(self):
+        pass
+
+    def __repr__(self):
+        return '{self.__class__.__name__}({self.name}, currentMove={self.currentMove}'.format(
+                self=self)
 
 class HumanPlayer(Player):
-    def __init__(self, mgr, keyLayout):
+    def __init__(self, name, mgr, keyLayout):
         """
         Initialize the player, including his keyboard layout
         Parameters:
         @keyLayout: a list of keys for up, down, left, right,
-                    respectively
+                    respectively. You can get these values by `input.key`.
         @mgr: a instance of InputManager
 
         self Paramater:
@@ -29,10 +40,10 @@ class HumanPlayer(Player):
         @self.historyKeyPressed
             A list used to record the history of the key still being pressed
         """
+        super(HumanPlayer, self).__init__(name)
         self.mgr = mgr
-        direction = ['UP', 'DOWN', 'LEFT', 'RIGHT']
+        direction = [Directions.UP, Directions.DOWN, Directions.LEFT, Directions.RIGHT]
         self.keyLayout = {i:j for i, j in zip(keyLayout, direction)}
-        self.currentMove = None
         self.bind_keys(keyLayout) #bind its key event to the inputmanager
         self.historyKeyPressed = [] 
 
@@ -54,9 +65,9 @@ class HumanPlayer(Player):
                 self.currentMove = self.keyLayout[self.historyKeyPressed[-1]]
             else:
                 self.currentMove = None
-
-        print self.currentMove
-
+        if self.currentMove:
+            self.snake.update_direction(self.currentMove)
+        dprint(self)
     def bind_keys(self, keyLayout):
         """
         Blind its keyLayout to the inputManager

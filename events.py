@@ -1,26 +1,21 @@
-# types of events
-DEFAULT_EVENT = 'default-event'
-GAME_EVENT = 'game-event'
-SNAKE_DIE = "snake-die"
-SNAKE_EAT = "snake-eat"
-SNAKE_MOVE = "snake-move"
-HIGH_SCORE = "high-score"
-FOOD_GEN = "food-gen"
-FOOD_DISAPPEAR = "food-disappear"
-# etc ..
-
-# mapping
-link_dict = {}
-
-def bound(evt, callback):
-    # the mapping should finally look like:
-    # evt -> [callback1, callback2, ...]
-    #
-    # a callback currently takes `world` as its parameter.
-    pass
+# An enumerate class.
+class EventTypes:
+    DEFAULT_EVENT = 'default-event'
+    GAME_EVENT = 'game-event'
+    SNAKE_DIE = "snake-die"
+    SNAKE_EAT = "snake-eat"
+    SNAKE_MOVE = "snake-move"
+    HIGH_SCORE = "high-score"
+    FOOD_GEN = "food-gen"
+    FOOD_DISAPPEAR = "food-disappear"
 
 class Event(object):
-    type = DEFAULT_EVENT
+    """
+    members:
+
+    @type: value from EventTypes
+    """
+    type = EventTypes.DEFAULT_EVENT
     def __init__(self, *args, **kwargs):
         for key, val in kwargs.iteritems():
             setattr(self, key, val)
@@ -37,33 +32,33 @@ class GameEvent(Event):
 
 # maybe subclassing will be better
 class SnakeDie(GameEvent):
-    type = SNAKE_DIE
+    type = EventTypes.SNAKE_DIE
     def __init__(self, reason, snake):
         self.reason = reason
         self.snake = snake
-        self.pos = snake.headPos
+        self.pos = snake.head
         super(SnakeDie, self).__init__()
 
 class SnakeEat(GameEvent):
-    type = SNAKE_EAT
+    type = EventTypes.SNAKE_EAT
     def __init__(self, snake, food):
-        self.pos = snake.headPos
+        self.pos = snake.head
         self.food = food
         self.snake = snake
 
 class SnakeMove(GameEvent):
-    type = SNAKE_MOVE
+    type = EventTypes.SNAKE_MOVE
     def __init__(self, snake):
         self.snake = snake
 
 class FoodGen(GameEvent):
-    type = FOOD_GEN
+    type = EventTypes.FOOD_GEN
     def __init__(self, food, pos):
         self.food = food
         self.pos = pos
 
 class FoodDisappear(GameEvent):
-    type = FOOD_DISAPPEAR
+    type = EventTypes.FOOD_DISAPPEAR
     def __init__(self, food, pos):
         self.food = food
         self.pos = pos
@@ -73,6 +68,12 @@ class EventManager:
         self._eventHandlers = {}
 
     def bind(self, eventType, handler):
+        """
+        @eventType: Value from EventTypes
+        @handler: A callable with one parameter. Prototype:
+                
+                def handler(event): pass
+        """
         if eventType not in self._eventHandlers:
             self._eventHandlers[eventType] = set()
         self._eventHandlers[eventType].add(handler)
@@ -82,7 +83,7 @@ class EventManager:
 
     def emit(self, event):
         eventType = event.type
-        for handler in self._eventHandlers[eventType]:
+        for handler in self._eventHandlers.get(eventType, []):
             handler(event)
 
     # @staticmethod

@@ -1,18 +1,40 @@
 # Author:
 # Description:
+from pygame.time import Clock
 
 from snake import Snake, Directions
 from world import World
-from player import HumanPlayer
+from player import HumanPlayer, AIPlayer
 from display import Display
-from inputManager import InputManager
+from input import InputManager
+from events import EventManager
+from debug import dprint
+import input
 
 class Game:
-    """
-    TODO
-    """
+    # TODO: doc
     def __init__(self):
-        self.inputManager = InputManager()
+        self.inputMgr = InputManager()
+        self.eventMgr = EventManager()
+
+    def join_player(self, name, keyLayout):
+        """
+        Join a player to the game.
+        @name: Player name
+        @keyLayout: If keyLayout is None, this will be an AIPlayer,
+                otherwise use keyLayout as an argument to instantiate a HumanPlayer.
+        """
+        playerCount = len(self.world.players)
+        if keyLayout:
+            player = HumanPlayer(name, self.inputMgr, keyLayout)
+        else:
+            player = AIPlayer(name)
+        snakeData = self.snakeDatas[playerCount]
+        snake = Snake(self.world, player)
+        snake.gen_body(*snakeData)
+        player.snake = snake
+        self.world.snakes.append(snake)
+        self.world.players.append(player)
 
     def setup_stage(self, configData):
         """
@@ -21,29 +43,13 @@ class Game:
             A dict containing:
             
             * world-size: (width, height)
-            * players: a list, [PlayerData1, PlayerData2, ..]
+            * snakes: a list, [SnakeData1, SnakeData2, ...]
 
-            PlayerData: a tuple, as keyLayout
+            SnakeData: a tuple (headPos, direction, length)
             
         """
         world = World(*configData['world-size'])
-        for playerData in configData['human-players']:
-            player = HumanPlayer(*playerData, 
-                inputManager=self.inputManager)
-            snake = Snake(world, player)
-            snake.gen_body((3, 1), Directions.RIGHT, 3)
-            world.field.gen_snake_grids(snake)
-            world.players += [player]
-            world.snakes += [snake]
-
-        for playerData in configData['ai-players']:
-            player = AIPlayer(*playerData)
-            snake = Snake(world, player)
-            snake.gen_body((0, 0), Directions.RIGHT, 3)
-            world.field.gen_snake_grids(snake)
-            world.players += [player]
-            world.snakes += [snake]
-
+        self.snakeDatas = configData['snakes']
         self.world = world
 
     def bind_event(self, eventType, callback):
@@ -52,31 +58,47 @@ class Game:
         @eventType: The event type.
         @callback: A callable, accepting one argument, the event.
         """
-        pass
+        self.eventMgr.bind(eventType, callback)
 
+    def quit(self, *args):
+        self._quit = True
 
     def mainloop(self, display):
         self.display = display
         # In display, the display should bind callbacks
         # to some game events.
-        # display.init(self)
+        display.init(self)
 
         self._quit = False
+        timer = Clock()
+        tickCount = 0
+        # TODO: move things like FPS to configure module
+        FPS = 30
         while not self._quit:
             # handle input
-            self.inputManager.update()
-
+            self.inputMgr.update()
             # update game state
-            self.world.update()
-
+            if tickCount % 15 == 0:
+                self.world.update(self.eventMgr)
             # render using display
             display.render(self.world)
+            timer.tick(FPS)
+            tickCount += 1
         display.quit()
+        dprint('quit normally')
 
-if __name__ == "__main__":
-    configData = {"world-size":(10,10),
-                    "human-players":[[['w','s','a','d']]],
-                    "ai-players":[]}
+if __name__ == '__main__':
+    configData = {
+            'world-size':(50,30),
+            'snakes': [
+                ((6, 4), Directions.RIGHT, 6),
+                ((12, 4), Directions.LEFT, 5),
+                ]
+            }
+    K = input.key
     game = Game()
+    game.inputMgr.bind(input.key_down_type('q'), game.quit)
     game.setup_stage(configData)
-    game.mainloop(Display())
+    game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
+    game.join_player("Foo", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
+    game.mainloop(Display(blkSize=10))

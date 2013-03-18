@@ -4,16 +4,9 @@ some can be used to display.
 
 Author: Ray
 """
-from events import *
+from debug import dprint
+from grids import Directions
 import grids
-
-class Directions:
-    LEFT = (-1, 0)
-    RIGHT = (1, 0)
-    UP = (0, -1)
-    DOWN = (0, 1)
-    # for iterating
-    all = (LEFT, RIGHT, UP, DOWN)
 
 class BodySection(object):
     def __init__(self, pos):
@@ -23,35 +16,41 @@ class BodySection(object):
         return "BodySection(pos={self.pos})".format(self=self)
 
 class Snake(object):
+    """
+    members:
+    @direction: A value from `Directions`
+    @body: A list of body sections
+    @blocked: Telling if the snake is blocked in next move
+    @alive: Telling if the snake is alive.
+    """
     def __init__(self, world, player):
         """
         Snake in the game logic. 
         parameters:
-        @world: the World (world.World) object where the snake lies
-        @player: the player (player.Player) controlling the snake
+        @world: the world (`world.World`) object where the snake lies
+        @player: the player (`player.Player`) controlling the snake
         """
         self.world = world
         self.player = player
 
         self.body = []
         self.direction = None
+        self.blocked = False
+        self.alive = True
 
     @property
     def head(self):
         """
-        The head position of the snake.
+        The head of the snake.
         """
-        try:
-            return self.body[0]
-        except IndexError:
-            return None
+        return self.body[0]
 
     def gen_body(self, headPos, direction, length):
         """
         Generate and set a body for the snake.
         @headPos: head position, an (x, y) tuple.
-        @direction: direction tuple, (dx, dy). For example, (-1, 0) makes the
-                    snake lies right to left.
+        @direction: direction tuple, (dx, dy). 
+                For example, Directions.RIGHT makes the snake lies right to left.
         @length: length of the generated body.
 
         @return: None
@@ -61,12 +60,12 @@ class Snake(object):
         positions = [headPos]
         x, y = headPos
         for i in xrange(1, length):
-            x, y = x + dx, y + dy
+            x, y = x - dx, y - dy
             positions.append((x, y))
         self.set_body(positions)
 
     def __repr__(self):
-        return "Snake(head={self.head}, positions={self.positions})".format(self=self)
+        return "Snake(blocked={self.blocked}, positions={self.positions})".format(self=self)
 
     def set_body(self, positions):
         """
@@ -76,26 +75,44 @@ class Snake(object):
         
         @return: None
         """
-        self.body = [BodySection(p) for p in positions]
+        # clear previous grids
+        for bsec in self.body:
+            grid = self.world.field.get_grid_at(*bsec.pos)
+            grid.type = grids.BLANK
+            grid.content = None
+        self.body = []
+        for pos in positions:
+            bsec = BodySection(pos)
+            self.world.field.get_grid_at(*pos).content = bsec
+            self.body.append(bsec)
 
     def next_positions(self):
         """
         @return: the positions of the snake's body sections after next move.
                 Note that the snake wouldn't move actually.
         """
-        dx, dy = self.direction
-        x0, y0 = self.head.pos
-        newHead = x0 + dx, y0 + dy
-        nextPositions = [newHead]
-        nextPositions.extend(self.positions[:-1])
-        return nextPositions
+        if not self.blocked:
+            nextPositions = [self.next_head_pos()]
+            nextPositions.extend(self.positions[:-1])
+            return nextPositions
+        else:
+            return self.positions
 
     @property
     def positions(self):
         """
         Current position of the body.
         """
-        return [sec.pos for sec in self.body]
+        return [bsec.pos for bsec in self.body]
+
+    def next_head_pos(self):
+        """
+        @return: Next head position according to self.direction.
+        """
+        dx, dy = self.direction
+        x0, y0 = self.head.pos
+        newHead = x0 + dx, y0 + dy
+        return newHead
 
     def update_direction(self, cmd):
         """
@@ -121,7 +138,6 @@ class Snake(object):
 
         @return: a direction tuple
         """
-        # XXX: wait for the document of Player.get_cmd
         return cmd
 
     def update(self):
@@ -133,37 +149,33 @@ class Snake(object):
 
         @return a list of emitted events during the update.
         """
-        print 'direction:', self.direction
-        dx, dy = self.direction
-        x0, y0 = self.head.pos
-        nextPos = x0 + dx, y0 + dy
-        for sec in self.body:
-            x0, y0 = sec.pos
-            sec.pos = x0 + dx, y0 + dy
-            #modified by legend
-            #nextPos, sec.pos = self.head.pos, nextPos
-        # snake moved
-        headPos = self.head.pos
-        grid = self.world.field.get_grid_at(*headPos)
-        if grid is None:
-            print 'Died'
-            return None
-        # test if the grid is empty
-        gameEvents = []
-        if grid.type == grids.BLANK:
-            gameEvents.append(GameEvent(
-                type=SNAKE_MOVE, 
-                target=self,
-                ))
-        # test if the grid has food
-        elif grid.type == grids.FOOD:
-            gameEvents.append(GameEvent(
-                type=SNAKE_EAT,
-                target=self,
-                food=grid.get_food(),
-                pos=headPos,
-                ))
-        return gameEvents
+        # print 'direction:', self.direction
+        nextPos = self.next_head_pos()
+        # update all bsec.pos by swapping
+        #  before: [n] | [0] [1] [2] [3]
+        #  swap 1: [0] | [n] [1] [2] [3]
+        #  swap 2: [1] | [n] [0] [2] [3]
+        #  swap 3: [2] | [n] [0] [1] [3]
+        # finish : [3] | [n] [0] [1] [2]
+        # where [i] means the self.body[i].pos before swapping.
+
+        # dprint('before update:', self.positions)
+        get_grid_at = self.world.field.get_grid_at
+        for bsec in self.body:
+            grid = get_grid_at(*bsec.pos)
+            grid.type = grids.BLANK
+            grid.content = None
+            nextPos, bsec.pos = bsec.pos, nextPos
+        for bsec in self.body:
+            grid = get_grid_at(*bsec.pos)
+            grid.type = grids.SNAKE
+            grid.content = bsec
+        # dprint('after update:', self.positions)
+
+    def die(self):
+        dprint('die. "Uuuuaaahhhh!!"'.format(self=self))
+        self.alive = False
+        self.set_body([])
 
 if __name__ == '__main__':
     def sep(title):

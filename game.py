@@ -17,7 +17,7 @@ class Game:
         self.inputMgr = InputManager()
         self.eventMgr = EventManager()
 
-    def join_player(self, name, keyLayout):
+    def join_player(self, name, keyLayout=None):
         """
         Join a player to the game.
         @name: Player name
@@ -73,12 +73,16 @@ class Game:
         timer = Clock()
         tickCount = 0
         # TODO: move things like FPS to configure module
+        # frame per second
         FPS = 30
+        # update per second
+        UPS = 2
         while not self._quit:
             # handle input
             self.inputMgr.update()
             # update game state
-            if tickCount % 15 == 0:
+            if tickCount % (FPS/UPS) == 0:
+                dprint('\n'+str(self.world.field))
                 self.world.update(self.eventMgr)
             # render using display
             display.render(self.world)
@@ -88,17 +92,41 @@ class Game:
         dprint('quit normally')
 
 if __name__ == '__main__':
-    configData = {
-            'world-size':(50,30),
+    cfgHitting = {
+            'world-size':(20, 20),
             'snakes': [
                 ((6, 4), Directions.RIGHT, 6),
                 ((12, 4), Directions.LEFT, 5),
                 ]
             }
+    cfgHitting3 = {
+            'world-size':(20, 20),
+            'snakes': [
+                ((6, 4), Directions.RIGHT, 6),
+                ((7, 6), Directions.RIGHT, 6),
+                ((8, 8), Directions.RIGHT, 6),
+                ]
+            }
+    cfgCircle4 = {
+            'world-size':(20, 20),
+            'snakes': [
+                ((12, 11), Directions.LEFT, 4),
+                ((11, 14), Directions.DOWN, 4),
+                ((14, 15), Directions.RIGHT, 4),
+                ((15, 12), Directions.UP, 4),
+                ]
+            }
     K = input.key
-    game = Game()
-    game.inputMgr.bind(input.key_down_type('q'), game.quit)
-    game.setup_stage(configData)
-    game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
-    game.join_player("Foo", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
-    game.mainloop(Display(blkSize=10))
+    dsp = Display(blkSize=20)
+    def test(configData):
+        game = Game()
+        game.inputMgr.bind(input.key_down_type('q'), game.quit)
+        game.setup_stage(configData)
+        snakes = configData['snakes']
+        game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
+        game.join_player("Bar", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
+        for i in xrange(2, len(snakes)):
+            game.join_player("Player#{}".format(i))
+        game.mainloop(dsp)
+
+    test(cfgCircle4)

@@ -1,8 +1,11 @@
-# Author: Legend
+"""
+Description: 
+  Gird is each grid on the field. Field is combined with grids.
+  These all are used by display at world. Different items have different displays.
 
-# Description: 
-#   Gird is each grid on the field. Field is combined with grids.
-#   These all are used by display at world. Different items have different displays.
+Author: Legend
+"""
+import sync
 
 # represent the grid status
 BLANK, SNAKE, FOOD = 0, 1, 2
@@ -23,6 +26,8 @@ class Grid:
         self.position = (x, y)
         self.type = BLANK
         self.content = None
+        self.lock = sync.Lock()
+        self.lock.pos = (x, y)
 
     def print_self(self):
         print "Grid position: %s \nGrid status: %d \n" % (self.position, self.status)
@@ -64,6 +69,11 @@ class Field:
             return self.fields[(x, y)]
         except KeyError:
             return None
+
+    def __iter__(self):
+        for x in xrange(self.width):
+            for y in xrange(self.height):
+                yield self.fields[x, y]
 
     # will be added by needs
     def update(self, snake):

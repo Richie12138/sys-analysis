@@ -83,7 +83,9 @@ class Snake(object):
         self.body = []
         for pos in positions:
             bsec = BodySection(pos)
-            self.world.field.get_grid_at(*pos).content = bsec
+            grid = self.world.field.get_grid_at(*bsec.pos)
+            grid.type = grids.SNAKE
+            grid.content = bsec
             self.body.append(bsec)
 
     def next_positions(self):
@@ -161,6 +163,7 @@ class Snake(object):
 
         # dprint('before update:', self.positions)
         get_grid_at = self.world.field.get_grid_at
+        # TODO: should not set 'grid.content = None' here.
         for bsec in self.body:
             grid = get_grid_at(*bsec.pos)
             grid.type = grids.BLANK

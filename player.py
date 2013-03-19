@@ -65,7 +65,7 @@ class HumanPlayer(Player):
                 self.currentMove = self.keyLayout[self.historyKeyPressed[-1]]
             else:
                 self.currentMove = None
-        if self.currentMove:
+        if self.currentMove and self.snake.alive:
             self.snake.update_direction(self.currentMove)
         dprint(self)
     def bind_keys(self, keyLayout):

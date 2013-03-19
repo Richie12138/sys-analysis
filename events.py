@@ -1,4 +1,6 @@
 # An enumerate class.
+from debug import dprint
+
 class EventTypes:
     DEFAULT_EVENT = 'default-event'
     GAME_EVENT = 'game-event'
@@ -33,10 +35,10 @@ class GameEvent(Event):
 # maybe subclassing will be better
 class SnakeDie(GameEvent):
     type = EventTypes.SNAKE_DIE
-    def __init__(self, reason, snake):
+    def __init__(self, reason, snake, pos):
         self.reason = reason
         self.snake = snake
-        self.pos = snake.head
+        self.pos = pos
         super(SnakeDie, self).__init__()
 
 class SnakeEat(GameEvent):
@@ -83,6 +85,7 @@ class EventManager:
 
     def emit(self, event):
         eventType = event.type
+        dprint('emit', event)
         for handler in self._eventHandlers.get(eventType, []):
             handler(event)
 

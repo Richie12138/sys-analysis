@@ -23,44 +23,36 @@ class World:
         """
         for player in self.players:
             player.update()
-            if player.snake.alive:
-                player.snake.update_direction(player.currentMove)
 
         field = self.field
+        racing = {}
+        # block all snakes that racing for a same position or hitting walls
+        nextPositions = [(snake, snake.next_positions()) for snake in self.snakes]
+        for snake, ps in nextPositions:
+            nextPos = ps[0]
+            grid = field.get_grid_at(*nextPos)
+            if grid:
+                racing[nextPos] = racing.get(nextPos, 0) + 1
+            else:
+                snake.blocked = True
+        for snake, ps in nextPositions:
+            if not snake.blocked and racing[ps[0]] > 1:
+                snake.blocked = True
         isStatic = False
-        eatings = {}
         while not isStatic:
-            nextPositions = []
             isStatic = True
-            # test if some snake blocked by food or wall
-            for snake in self.snakes:
-                poss = snake.next_positions()
-                headPos = poss[0]
-                grid = field.get_grid_at(*headPos)
-                if grid is None:
-                    snake.blocked = True
-                    dprint('block by field border')
-                    isStatic = False
-                elif grid.type == grids.FOOD:
-                    # block by food
-                    dprint('block by food')
-                    snake.blocked = True
-                    eatings[grid.position] = eatings.get(grid.position, 0) + 1
-                    isStatic = False
-                nextPositions.append((snake, poss))
-            # dprint('nextPositions:', nextPositions)
-            if not isStatic: continue
-            # test if some snake block by other snake in next move
-            for snake, poss in nextPositions:
-                headPos = poss[0]
-                if headPos in poss[1:]:
-                    dprint('block by {}'.format(snake), 'headPos', headPos, 'poss[1:]', poss[1:])
+            # block all snakes that will hit other snakes
+            nextPositions = [(snake, snake.next_positions()) for snake in self.snakes]
+            for snake, ps in nextPositions:
+                nextPos = ps[0]
+                if nextPos in ps[1:]:
+                    dprint('{} block by {}'.format(snake, 'self'), 'headPos', headPos, 'poss[1:]', poss[1:])
                     snake.blocked = True
                     isStatic = False
                     break
-                for snake1, poss1 in nextPositions:
-                    if snake1 is not snake and headPos in poss1:
-                        dprint('block by {}'.format(snake1))
+                for snake1, ps1 in nextPositions:
+                    if snake1 is not snake and nextPos in ps1:
+                        dprint('{} block by {}'.format(snake, snake1))
                         snake.blocked = True
                         isStatic = False
                         break
@@ -78,6 +70,7 @@ class World:
                         eventMgr.emit(SnakeDie(
                             reason="racing for food",
                             snake=snake,
+                            pos=nextHead,
                             ))
                         snake.die()
                     else:
@@ -96,12 +89,13 @@ class World:
                         reason = "blocked by other snake"
                     elif grid.type == grids.BLANK:
                         reason = "race for a position"
-                    eventMgr.emit(SnakeDie( reason=reason, snake=snake))
+                    eventMgr.emit(SnakeDie(reason=reason, snake=snake, pos=nextHead))
                     snake.die()
                 elif grid is None:
                     eventMgr.emit(SnakeDie(
                         reason="blocked by field border",
                         snake=snake,
+                        pos=nextHead,
                         ))
                     snake.die()
             else:

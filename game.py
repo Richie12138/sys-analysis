@@ -82,7 +82,7 @@ class Game:
             self.inputMgr.update()
             # update game state
             if tickCount % (FPS/UPS) == 0:
-                dprint('\n'+str(self.world.field))
+                dprint('before update\n'+str(self.world.field))
                 self.world.update(self.eventMgr)
             # render using display
             display.render(self.world)
@@ -92,6 +92,12 @@ class Game:
         dprint('quit normally')
 
 if __name__ == '__main__':
+    cfgSingle = {
+            'world-size': (5, 5),
+            'snakes':[
+                ((2, 2), Directions.RIGHT, 3),
+                ]
+            }
     cfgHitting = {
             'world-size':(20, 20),
             'snakes': [
@@ -124,9 +130,13 @@ if __name__ == '__main__':
         game.setup_stage(configData)
         snakes = configData['snakes']
         game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
-        game.join_player("Bar", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
+        if len(snakes) > 1:
+            game.join_player("Bar", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
         for i in xrange(2, len(snakes)):
             game.join_player("Player#{}".format(i))
         game.mainloop(dsp)
 
-    test(cfgCircle4)
+    # test(cfgCircle4)
+    # test(cfgHitting)
+    test(cfgHitting3)
+    # test(cfgSingle)

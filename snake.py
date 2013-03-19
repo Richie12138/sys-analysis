@@ -7,6 +7,7 @@ Author: Ray
 from debug import dprint
 from grids import Directions
 import grids
+from events import EventTypes, SnakeDie, SnakeEat, SnakeMove
 
 class BodySection(object):
     def __init__(self, pos):
@@ -20,7 +21,6 @@ class Snake(object):
     members:
     @direction: A value from `Directions`
     @body: A list of body sections
-    @blocked: Telling if the snake is blocked in next move
     @alive: Telling if the snake is alive.
     """
     def __init__(self, world, player):
@@ -35,7 +35,6 @@ class Snake(object):
 
         self.body = []
         self.direction = None
-        self.blocked = False
         self.alive = True
 
     @property
@@ -65,7 +64,7 @@ class Snake(object):
         self.set_body(positions)
 
     def __repr__(self):
-        return "Snake(blocked={self.blocked}, positions={self.positions})".format(self=self)
+        return "Snake(positions={self.positions})".format(self=self)
 
     def set_body(self, positions):
         """
@@ -80,25 +79,16 @@ class Snake(object):
             grid = self.world.field.get_grid_at(*bsec.pos)
             grid.type = grids.BLANK
             grid.content = None
+            grid.lock.release(self)
         self.body = []
         for pos in positions:
             bsec = BodySection(pos)
             grid = self.world.field.get_grid_at(*bsec.pos)
+            self.body.append(bsec)
             grid.type = grids.SNAKE
             grid.content = bsec
-            self.body.append(bsec)
-
-    def next_positions(self):
-        """
-        @return: the positions of the snake's body sections after next move.
-                Note that the snake wouldn't move actually.
-        """
-        if not self.blocked:
-            nextPositions = [self.next_head_pos()]
-            nextPositions.extend(self.positions[:-1])
-            return nextPositions
-        else:
-            return self.positions
+            grid.lock.acquire(self, None, None)
+            grid.lock.update()
 
     @property
     def positions(self):
@@ -142,17 +132,27 @@ class Snake(object):
         """
         return cmd
 
-    def update(self):
+    def eat(self, grid):
         """
-        Update the snake's body. During the update:
+        Eat the food on the grid. Clear the grid and place the new head there.
 
-        * If the movement succeed, emit a SNAKE_MOVE GameEvent. 
-        * If the snake eats a food, emit a SNAKE_EAT GameEvent.
-
-        @return a list of emitted events during the update.
+        @grid: The grid containing food
         """
-        # print 'direction:', self.direction
-        nextPos = self.next_head_pos()
+        grid.type = grids.BLANK
+        grid.content = self.head
+        # create the tail section
+        tail = BodySection(self.body[-1].pos)
+        self.move_forward()
+        # allocate a grid for the tail
+        tailGrid = self.world.field.get_grid_at(*tail.pos)
+        self.body.append(tail)
+        tailGrid.type = grids.SNAKE
+        tailGrid.content = tail
+        dprint('eat')
+        tailGrid.lock.acquire(self, None, None)
+        tailGrid.lock.update()
+
+    def move_forward(self):
         # update all bsec.pos by swapping
         #  before: [n] | [0] [1] [2] [3]
         #  swap 1: [0] | [n] [1] [2] [3]
@@ -161,19 +161,72 @@ class Snake(object):
         # finish : [3] | [n] [0] [1] [2]
         # where [i] means the self.body[i].pos before swapping.
 
-        # dprint('before update:', self.positions)
         get_grid_at = self.world.field.get_grid_at
-        # TODO: should not set 'grid.content = None' here.
+        nextPos = self.next_head_pos()
+        grid = get_grid_at(*nextPos)
+        grid.lock.acquire(self, None, None)
         for bsec in self.body:
             grid = get_grid_at(*bsec.pos)
             grid.type = grids.BLANK
             grid.content = None
+
             nextPos, bsec.pos = bsec.pos, nextPos
-        for bsec in self.body:
+
             grid = get_grid_at(*bsec.pos)
             grid.type = grids.SNAKE
             grid.content = bsec
-        # dprint('after update:', self.positions)
+        # now nextPos is the original tail pos
+        get_grid_at(*nextPos).lock.release(self)
+
+    def on_acquire_succeed(self):
+        # dprint('before update:', self.positions)
+        grid = self._nextGrid
+        nextPos = grid.position
+        # test if the grid contains food
+        if grid.type == grids.FOOD:
+            self.eat(grid)
+            self.eventMgr.emit(SnakeEat(snake=snake, food=grid.food, pos=nextPos))
+        else:
+            self.move_forward()
+            self.eventMgr.emit(SnakeMove(snake=self))
+
+    def on_acquire_fail(self, reason, pos):
+        def func():
+            self.eventMgr.emit(SnakeDie(
+                reason=reason,
+                snake=self,
+                pos=pos,
+                ))
+            self.die()
+        return func
+
+    def update(self, eventMgr):
+        """
+        Update the snake's body. During the update:
+
+        * If the movement succeed, emit a SNAKE_MOVE GameEvent. 
+        * If the snake eats a food, emit a SNAKE_EAT GameEvent.
+        * If the snake dies, emit a SNAKE_DIE GameEvent.
+
+        @eventMgr: A eventMgr for emitting events.
+
+        """
+        if not self.alive: return
+        nextPos = self.next_head_pos()
+        grid = self.world.field.get_grid_at(*nextPos)
+        if grid is None:
+            eventMgr.emit(SnakeDie(
+                reason="block by field border",
+                snake=self,
+                pos=nextPos,
+                ))
+            self.die()
+        else:
+            self._nextGrid = grid
+            self.eventMgr = eventMgr
+            dprint('try go forward')
+            grid.lock.acquire(self, self.on_acquire_succeed, 
+                    self.on_acquire_fail('blocked by others', grid.position))
 
     def die(self):
         dprint('die. "Uuuuaaahhhh!!"'.format(self=self))
@@ -196,12 +249,12 @@ if __name__ == '__main__':
     snake.gen_body((3, 0), Directions.LEFT, 3)
     print(snake)
 
-    sep('test moving')
-    snake.update_direction(Directions.RIGHT)
-    print('direction:', snake.direction)
-    print('cur positions:', snake.positions)
-    print('next positions:', snake.next_positions())
-    snake.update_direction(Directions.DOWN)
-    print('direction:', snake.direction)
-    print('cur positions:', snake.positions)
-    print('next positions:', snake.next_positions())
+    # sep('test moving')
+    # snake.update_direction(Directions.RIGHT)
+    # print('direction:', snake.direction)
+    # print('cur positions:', snake.positions)
+    # print('next positions:', snake.next_positions())
+    # snake.update_direction(Directions.DOWN)
+    # print('direction:', snake.direction)
+    # print('cur positions:', snake.positions)
+    # print('next positions:', snake.next_positions())

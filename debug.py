@@ -6,6 +6,14 @@ _logFile = open(LOG_FILE, 'w')
 
 def dprint(*args, **kwargs):
     frame = inspect.stack()[1]
-    module = inspect.getmodule(frame[0])
-    print('[{}]: '.format(module.__name__), *args)
-    print('[{}]: '.format(module.__name__), *args, file=_logFile)
+    modules = []
+    stacks = inspect.stack()[1:]
+    for frame in stacks:
+        name = inspect.getmodule(frame[0]).__name__
+        if name != '__main__':
+            modules.append(name)
+    if not modules:
+        modules.append('__main__')
+    modules = '->'.join(x for x in reversed(modules))
+    print('[{}]: '.format(modules), *args)
+    print('[{}]: '.format(modules), *args, file=_logFile)

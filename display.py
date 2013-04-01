@@ -26,6 +26,14 @@ class LayerStack:
     def size_of(self, layerName):
         return len(self.layers[layerName])
 
+    def __iter__(self):
+        # TODO
+        pass
+
+    def next(self):
+        # TODO
+        pass
+
 class ImageFactory:
     """
     A factory of all images/sprites.
@@ -77,8 +85,8 @@ class Display:
 
         # rendering callbacks
         self.renderCallbacks = {}
-        self.renderCallbacks['snake'] = self.render_for_snake
-        self.renderCallbacks['field'] = self.render_for_field
+        self.renderCallbacks['snake'] = self.render_snake
+        self.renderCallbacks['field'] = self.render_field
 
         # All kinds of snakes
         self.snake_apperance = [
@@ -91,6 +99,12 @@ class Display:
         self.add_field(game.world.field)
 
         # TODO: Add panel to sky
+
+    def render_snake(self, objToRender):
+        snake = objToRender
+
+    def render_field(self, objToRender):
+        field = objToRender
 
     def add_field(self, field):
         self.layerStack.add_to_layer('field', field)

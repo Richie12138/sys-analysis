@@ -17,8 +17,8 @@ class LayerStack:
         self.layers = {}
 
     def push_layer(self, layerName):
-        self.layersSequence += layerName
-        self.layers[layername] = []
+        self.layersSequence += [layerName]
+        self.layers[layerName] = []
 
     def add_to_layer(self, layerName, item):
         self.layers[layerName].append(item)
@@ -27,12 +27,27 @@ class LayerStack:
         return len(self.layers[layerName])
 
     def __iter__(self):
-        # TODO
-        pass
+        self.itLayer = iter(self.layersSequence)
+        self.itItem = None
+        return self
 
     def next(self):
-        # TODO
-        pass
+        if self.itItem == None:
+            self.curLayer = self.itLayer.next()
+            self.itItem = iter(self.layers[self.curLayer])
+            self.curItem = self.itItem.next()
+            return self.curItem
+        try:
+            self.curItem = self.itItem.next()
+            return self.curItem
+        except:
+            try:
+                self.curLayer = self.itLayer.next()
+                self.itItem = iter(self.layers[self.curLayer])
+                self.curItem = self.itItem.next()
+                return self.curItem
+            except:
+                raise StopIteration
 
 class ImageFactory:
     """
@@ -44,21 +59,19 @@ class ImageFactory:
         self.container = {}
 
     def register(self, appearance, fname):
-    """
-    Link an apperance to an actual image.
-    """
-        # TODO
-        pass
+        """
+        Link an apperance to an actual image.
+        """
+        self.container[appearance] = pygame.image.load(fname)
 
-    def getImage(self, appearance)
-    """
-    Return a surface for an appearance
-    """
-        # TODO
-        pass
+    def getImage(self, appearance):
+        """
+        Return a surface for an appearance
+        """
+        return self.container[appearance]
 
 class Display:
-    def __init__(self, width=500, height=500):
+    def __init__(self, width=600, height=600):
         """
         Initialize display.
         @width: width of the stage
@@ -98,13 +111,33 @@ class Display:
         # Add field
         self.add_field(game.world.field)
 
+        # Init images
+        self.imageFactory = ImageFactory()
+        self.imageFactory.register('grid-'+str(grids.BLANK), 'img/grid-blank.png')
+        self.imageFactory.register('grid-'+str(grids.SNAKE), 'img/grid-snake.png')
+        self.imageFactory.register('grid-'+str(grids.FOOD), 'img/grid-food.png')
+
         # TODO: Add panel to sky
 
+        # Initialize stage
+        self.fieldX = 80
+        self.fieldY = 80
+
     def render_snake(self, objToRender):
+        # TODO: render a snake
         snake = objToRender
+        body_len = len(snake.body)
 
     def render_field(self, objToRender):
+        # TODO: render a field
         field = objToRender
+        for y in range(0, field.height):
+            for x in range(0, field.width):
+                self.window.blit(
+                    self.imageFactory.getImage(
+                        'grid-'+str(field.get_grid_at(x, y).type)),
+                    (self.fieldX+x*self.blkSize,
+                        self.fieldY+y*self.blkSize))
 
     def add_field(self, field):
         self.layerStack.add_to_layer('field', field)
@@ -142,7 +175,19 @@ class Display:
         pass
 
 if __name__ == "__main__":
-    world = world.World(10, 10)
-    display = Display(blkSize=10)
-    while True:
-        display.render(world)
+    """
+    Unit test
+    """
+    ls = LayerStack()
+    ls.push_layer('ground')
+    ls.push_layer('sky')
+
+    print ls.layers
+    print ls.layersSequence
+
+    ls.add_to_layer('sky', 'eagle')
+    ls.add_to_layer('ground', 'cow')
+    ls.add_to_layer('sky', 'bird')
+    ls.add_to_layer('ground', 'monkey')
+    for animal in ls:
+        print animal

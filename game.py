@@ -123,7 +123,7 @@ if __name__ == '__main__':
                 ]
             }
     K = input.key
-    dsp = Display(blkSize=20)
+    dsp = Display()
     def test(configData):
         game = Game()
         game.inputMgr.bind(input.key_down_type('q'), game.quit)

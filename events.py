@@ -4,6 +4,7 @@ from debug import dprint
 class EventTypes:
     DEFAULT_EVENT = 'default-event'
     GAME_EVENT = 'game-event'
+    SNAKE_BORN = 'snake-born'
     SNAKE_DIE = "snake-die"
     SNAKE_EAT = "snake-eat"
     SNAKE_MOVE = "snake-move"
@@ -33,6 +34,12 @@ class GameEvent(Event):
     pass
 
 # maybe subclassing will be better
+class SnakeBorn(GameEvent):
+    type = EventTypes.SNAKE_BORN
+    def __init__(self, snake):
+        self.snake = snake
+        super(SnakeBorn, self).__init__()
+
 class SnakeDie(GameEvent):
     type = EventTypes.SNAKE_DIE
     def __init__(self, reason, snake, pos):

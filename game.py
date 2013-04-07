@@ -10,6 +10,7 @@ from input import InputManager
 from events import EventManager
 from debug import dprint
 import input
+import events
 
 class Game:
     # TODO: doc
@@ -29,14 +30,18 @@ class Game:
             player = HumanPlayer(name, self.inputMgr, keyLayout)
         else:
             player = AIPlayer(name)
+        # build up a snake
         snakeData = self.snakeDatas[playerCount]
         snake = Snake(self.world, player)
         snake.gen_body(*snakeData)
         player.snake = snake
+        # let the snake's name same as the player's name
+        snake.name = name
+        # add snake and player to the world
         self.world.snakes.append(snake)
         self.world.players.append(player)
-
-        self.display.add_snake(snake)
+        # emit a SNAKE_BORN event
+        self.eventMgr.emit(events.SnakeBorn(snake))
 
     def setup_stage(self, configData, display):
         """
@@ -100,6 +105,13 @@ if __name__ == '__main__':
                 ((10, 10), Directions.RIGHT, 8),
                 ]
             }
+    cfgDouble = {
+            'world-size': (20, 20),
+            'snakes':[
+                ((10, 5), Directions.RIGHT, 8),
+                ((10, 15), Directions.LEFT, 8),
+                ]
+            }
     cfgHitting = {
             'world-size':(20, 20),
             'snakes': [
@@ -141,4 +153,5 @@ if __name__ == '__main__':
     # test(cfgCircle4)
     # test(cfgHitting)
     #test(cfgHitting3)
-    test(cfgSingle)
+    # test(cfgSingle)
+    test(cfgDouble)

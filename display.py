@@ -11,9 +11,7 @@ class LayerStack:
     A stack of layers, to store items with
     different depths.
 
-    It adopts the iterator design pattern.
     """
-
     def __init__(self):
         self.layersSequence = []
         self.layers = {}
@@ -28,32 +26,10 @@ class LayerStack:
     def size_of(self, layerName):
         return len(self.layers[layerName])
 
-    #
-    # Iterator design pattern
     def __iter__(self):
-        self.itLayer = iter(self.layersSequence)
-        self.itItem = None
-        return self
-
-    #
-    # Iterator design pattern
-    def next(self):
-        if self.itItem == None:
-            self.curLayer = self.itLayer.next()
-            self.itItem = iter(self.layers[self.curLayer])
-            self.curItem = self.itItem.next()
-            return self.curItem
-        try:
-            self.curItem = self.itItem.next()
-            return self.curItem
-        except:
-            try:
-                self.curLayer = self.itLayer.next()
-                self.itItem = iter(self.layers[self.curLayer])
-                self.curItem = self.itItem.next()
-                return self.curItem
-            except:
-                raise StopIteration
+        for layerName in self.layersSequence:
+            for item in self.layers[layerName]:
+                yield item
 
 class ImageFactory:
     """
@@ -69,7 +45,7 @@ class ImageFactory:
         Link an apperance to an actual image.
         """
         self.container[appearance] = pygame.transform.rotate(
-                pygame.image.load(fname), angle)
+                pygame.image.load(fname).convert_alpha(), angle)
 
     def get_image(self, appearance):
         """
@@ -86,7 +62,7 @@ class Display:
         """
         pygame.display.init()
         pygame.font.init()
-        self.window = pygame.display.set_mode((width, height))
+        self.window = pygame.display.set_mode((width, height), 0, 32)
         self.width = width
         self.height = height
 
@@ -108,8 +84,6 @@ class Display:
 
         # rendering callbacks
         self.renderCallbacks = {}
-        self.renderCallbacks['snake'] = self.render_snake
-        self.renderCallbacks['field'] = self.render_field
 
         # All kinds of snakes
         self.snakeAppearance = [
@@ -143,6 +117,7 @@ class Display:
         snake = event.snake
         r = self.imageFactory.register
         name = snake.name
+        self.renderCallbacks[name] = self.render_snake
         # image path template
         appearance = self.snakeAppearance[self.layerStack.size_of('snakes')]
         self.layerStack.add_to_layer('snakes', snake)
@@ -221,6 +196,7 @@ class Display:
     def add_field(self, field):
         self.layerStack.add_to_layer('field', field)
         field.name = 'field'
+        self.renderCallbacks[field.name] = self.render_field
         field.appearance = 'field'
 
     def render(self, world):
@@ -231,14 +207,10 @@ class Display:
         """
         #
         # reset
-        self.window.fill((255, 255, 255))
+        self.window.fill((255, 255, 255, 255))
 
-        # XXX: Why renderCallbacks? Things should be rendered layer by layer.
-        # for item in self.layerStack:
-        #     self.renderCallbacks[item.name](item)
         for item in self.layerStack:
-            if isinstance(item, Snake):
-                self.render_snake(item)
+            self.renderCallbacks[item.name](item)
 
         pygame.display.flip()
 

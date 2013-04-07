@@ -68,7 +68,7 @@ class ImageFactory:
         """
         self.container[appearance] = pygame.transform.rotate(pygame.image.load(fname), angle)
 
-    def getImage(self, appearance):
+    def get_image(self, appearance):
         """
         Return a surface for an appearance
         """
@@ -192,7 +192,7 @@ class Display:
         for y in range(0, field.height):
             for x in range(0, field.width):
                 self.window.blit(
-                    self.imageFactory.getImage(
+                    self.imageFactory.get_image(
                         'grid-'+str(field.get_grid_at(x, y).type)),
                     (self.fieldX+x*self.blkSize,
                         self.fieldY+y*self.blkSize))
@@ -213,17 +213,15 @@ class Display:
 
     def render(self, world):
         """
-        Render the world.
+        Render the world. This will be called at each update in main loop.
         
-        TODO: So now I need a callback. Where should it
-        be?
-
         @world: world to render
         """
         #
         # reset
         self.window.fill((255, 255, 255))
 
+        # XXX: Why renderCallbacks? Things should be rendered layer by layer.
         for item in self.layerStack:
             self.renderCallbacks[item.name](item)
 

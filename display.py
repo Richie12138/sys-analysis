@@ -2,14 +2,14 @@ import pygame
 import world
 import grids
 
-# TODO build a factory for sprites
+# TODO cool down mechanism
 
 class LayerStack:
     """
     A stack of layers, to store items with
     different depths.
 
-    TODO: make it iteratable
+    It adopts the iterator design pattern.
     """
 
     def __init__(self):
@@ -26,11 +26,15 @@ class LayerStack:
     def size_of(self, layerName):
         return len(self.layers[layerName])
 
+    #
+    # Iterator design pattern
     def __iter__(self):
         self.itLayer = iter(self.layersSequence)
         self.itItem = None
         return self
 
+    #
+    # Iterator design pattern
     def next(self):
         if self.itItem == None:
             self.curLayer = self.itLayer.next()
@@ -58,11 +62,11 @@ class ImageFactory:
     def __init__(self):
         self.container = {}
 
-    def register(self, appearance, fname):
+    def register(self, appearance, fname, angle=0):
         """
         Link an apperance to an actual image.
         """
-        self.container[appearance] = pygame.image.load(fname)
+        self.container[appearance] = pygame.transform.rotate(pygame.image.load(fname), angle)
 
     def getImage(self, appearance):
         """
@@ -92,7 +96,7 @@ class Display:
         # Initialize layer system
         self.layerStack = LayerStack()
         self.layerStack.push_layer('field')
-        self.layerStack.push_layer('items')
+        #self.layerStack.push_layer('items')
         self.layerStack.push_layer('snakes')
         self.layerStack.push_layer('sky')
 
@@ -102,7 +106,7 @@ class Display:
         self.renderCallbacks['field'] = self.render_field
 
         # All kinds of snakes
-        self.snake_apperance = [
+        self.snake_appearance = [
             'snake-red',
             'snake-blue',
             'snake-green',
@@ -111,11 +115,31 @@ class Display:
         # Add field
         self.add_field(game.world.field)
 
-        # Init images
+        # Register images for sprites
         self.imageFactory = ImageFactory()
-        self.imageFactory.register('grid-'+str(grids.BLANK), 'img/grid-blank.png')
-        self.imageFactory.register('grid-'+str(grids.SNAKE), 'img/grid-snake.png')
-        self.imageFactory.register('grid-'+str(grids.FOOD), 'img/grid-food.png')
+        r = self.imageFactory.register
+        r('grid-'+str(grids.BLANK), 'img/grid-blank.png')
+        r('grid-'+str(grids.SNAKE), 'img/grid-snake.png')
+        r('grid-'+str(grids.FOOD), 'img/grid-food.png')
+        r('snake-red-1212', 'img/snake-red.png')
+        r('snake-red-1010', 'img/snake-red.png', 0)
+        r('snake-red-2121', 'img/snake-red.png', 90)
+        r('snake-red-0101', 'img/snake-red.png', 90)
+
+        r('snake-red-2112', 'img/snake-red-turn.png', 180)
+        r('snake-red-1221', 'img/snake-red-turn.png', 0)
+        r('snake-red-2110', 'img/snake-red-turn.png', 90)
+        r('snake-red-1021', 'img/snake-red-turn.png', 270)
+
+        r('snake-red-0110', 'img/snake-red-turn.png', 0)
+        r('snake-red-1201', 'img/snake-red-turn.png', 90)
+        r('snake-red-1001', 'img/snake-red-turn.png', 180)
+        r('snake-red-0112', 'img/snake-red-turn.png', 270)
+
+        r('snake-red-head-10', 'img/snake-red-head.png')
+        r('snake-red-head-12', 'img/snake-red-head.png', 180)
+        r('snake-red-head-01', 'img/snake-red-head.png', 90)
+        r('snake-red-head-21', 'img/snake-red-head.png', 270)
 
         # TODO: Add panel to sky
 
@@ -124,12 +148,46 @@ class Display:
         self.fieldY = 80
 
     def render_snake(self, objToRender):
-        # TODO: render a snake
         snake = objToRender
         body_len = len(snake.body)
+        body = snake.body
+
+        # magic numbers:
+        # 1212 down down
+        # 2121 right right
+        # 0101 left left
+        # 1010 up up
+
+        # 1221 down right
+        # 2112 right down
+        # 2110 right up
+        # 1021 up right
+        # 0110 left up
+        # 0112 left down
+        # 1201 down left
+        # 1001 up left
+
+        # Render head
+        self.window.blit(
+            self.imageFactory.getImage(snake.appearance+'-head-'+ \
+                str(snake.direction[0]+1)+str(snake.direction[1]+1)),
+            (self.fieldX+snake.body[0].pos[0]*self.blkSize,
+                self.fieldY+snake.body[0].pos[1]*self.blkSize))
+
+        # Render body
+        i = 1
+        while i != body_len-1:
+            self.window.blit(
+                self.imageFactory.getImage(snake.appearance+'-'+ \
+                    str(body[i].pos[0]-body[i+1].pos[0]+1)+\
+                    str(body[i].pos[1]-body[i+1].pos[1]+1)+\
+                    str(body[i-1].pos[0]-body[i].pos[0]+1)+\
+                    str(body[i-1].pos[1]-body[i].pos[1]+1)),
+                (self.fieldX+body[i].pos[0]*self.blkSize,
+                    self.fieldY+body[i].pos[1]*self.blkSize))
+            i += 1
 
     def render_field(self, objToRender):
-        # TODO: render a field
         field = objToRender
         for y in range(0, field.height):
             for x in range(0, field.width):
@@ -149,9 +207,9 @@ class Display:
         Add the snake to the corresponding layer
         and assign it a name(for render purpose)
         """
-        self.layerStack.add_to_layer('snakes', snake)
         snake.name = 'snake'
-        snake.apperance = self.snake_apperance[self.layerStack.size_of('snakes')]
+        snake.appearance = self.snake_appearance[self.layerStack.size_of('snakes')]
+        self.layerStack.add_to_layer('snakes', snake)
 
     def render(self, world):
         """

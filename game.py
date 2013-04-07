@@ -36,7 +36,9 @@ class Game:
         self.world.snakes.append(snake)
         self.world.players.append(player)
 
-    def setup_stage(self, configData):
+        self.display.add_snake(snake)
+
+    def setup_stage(self, configData, display):
         """
         Setups the game stage.
         @configData: 
@@ -52,6 +54,11 @@ class Game:
         self.snakeDatas = configData['snakes']
         self.world = world
 
+        self.display = display
+        # In display, the display should bind callbacks
+        # to some game events.
+        display.init(self)
+
     def bind_event(self, eventType, callback):
         """
         Bind the callback to events specified by `eventType`
@@ -63,12 +70,7 @@ class Game:
     def quit(self, *args):
         self._quit = True
 
-    def mainloop(self, display):
-        self.display = display
-        # In display, the display should bind callbacks
-        # to some game events.
-        display.init(self)
-
+    def mainloop(self):
         self._quit = False
         timer = Clock()
         tickCount = 0
@@ -85,17 +87,17 @@ class Game:
                 dprint('before update\n'+str(self.world.field))
                 self.world.update(self.eventMgr)
             # render using display
-            display.render(self.world)
+            self.display.render(self.world)
             timer.tick(FPS)
             tickCount += 1
-        display.quit()
+        self.display.quit()
         dprint('quit normally')
 
 if __name__ == '__main__':
     cfgSingle = {
-            'world-size': (5, 5),
+            'world-size': (20, 20),
             'snakes':[
-                ((2, 2), Directions.RIGHT, 3),
+                ((10, 10), Directions.RIGHT, 8),
                 ]
             }
     cfgHitting = {
@@ -127,16 +129,16 @@ if __name__ == '__main__':
     def test(configData):
         game = Game()
         game.inputMgr.bind(input.key_down_type('q'), game.quit)
-        game.setup_stage(configData)
+        game.setup_stage(configData, dsp)
         snakes = configData['snakes']
         game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
         if len(snakes) > 1:
             game.join_player("Bar", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
         for i in xrange(2, len(snakes)):
             game.join_player("Player#{}".format(i))
-        game.mainloop(dsp)
+        game.mainloop()
 
     # test(cfgCircle4)
     # test(cfgHitting)
-    test(cfgHitting3)
-    # test(cfgSingle)
+    #test(cfgHitting3)
+    test(cfgSingle)

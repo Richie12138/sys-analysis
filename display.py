@@ -1,6 +1,8 @@
 import pygame
 import world
 import grids
+from snake import Snake
+from events import EventTypes
 
 # TODO cool down mechanism
 
@@ -66,7 +68,8 @@ class ImageFactory:
         """
         Link an apperance to an actual image.
         """
-        self.container[appearance] = pygame.transform.rotate(pygame.image.load(fname), angle)
+        self.container[appearance] = pygame.transform.rotate(
+                pygame.image.load(fname), angle)
 
     def get_image(self, appearance):
         """
@@ -91,7 +94,10 @@ class Display:
         self.blkSize = 20
 
     def init(self, game):
-        # TODO: Bind handlers for gameEvents here.
+        game.bind_event(EventTypes.SNAKE_BORN, self.add_snake)
+        game.bind_event(EventTypes.SNAKE_DIE, self.handle_snake_die)
+        # TODO: Bind handlers for gameEvents here. 
+        #   Interested events: SnakeBorn, SnakeEat, SnakeDie, FoodGen, FoodDisappear
 
         # Initialize layer system
         self.layerStack = LayerStack()
@@ -106,7 +112,8 @@ class Display:
         self.renderCallbacks['field'] = self.render_field
 
         # All kinds of snakes
-        self.snake_appearance = [
+        self.snakeAppearance = [
+            'snake-red',
             'snake-red',
             'snake-blue',
             'snake-green',
@@ -118,28 +125,9 @@ class Display:
         # Register images for sprites
         self.imageFactory = ImageFactory()
         r = self.imageFactory.register
-        r('grid-'+str(grids.BLANK), 'img/grid-blank.png')
-        r('grid-'+str(grids.SNAKE), 'img/grid-snake.png')
-        r('grid-'+str(grids.FOOD), 'img/grid-food.png')
-        r('snake-red-1212', 'img/snake-red.png')
-        r('snake-red-1010', 'img/snake-red.png', 0)
-        r('snake-red-2121', 'img/snake-red.png', 90)
-        r('snake-red-0101', 'img/snake-red.png', 90)
-
-        r('snake-red-2112', 'img/snake-red-turn.png', 180)
-        r('snake-red-1221', 'img/snake-red-turn.png', 0)
-        r('snake-red-2110', 'img/snake-red-turn.png', 90)
-        r('snake-red-1021', 'img/snake-red-turn.png', 270)
-
-        r('snake-red-0110', 'img/snake-red-turn.png', 0)
-        r('snake-red-1201', 'img/snake-red-turn.png', 90)
-        r('snake-red-1001', 'img/snake-red-turn.png', 180)
-        r('snake-red-0112', 'img/snake-red-turn.png', 270)
-
-        r('snake-red-head-10', 'img/snake-red-head.png')
-        r('snake-red-head-12', 'img/snake-red-head.png', 180)
-        r('snake-red-head-01', 'img/snake-red-head.png', 90)
-        r('snake-red-head-21', 'img/snake-red-head.png', 270)
+        r('grid-%s'%(grids.BLANK), 'img/grid-blank.png')
+        r('grid-%s'%(grids.SNAKE), 'img/grid-snake.png')
+        r('grid-%s'%(grids.FOOD), 'img/grid-food.png')
 
         # TODO: Add panel to sky
 
@@ -147,45 +135,78 @@ class Display:
         self.fieldX = 80
         self.fieldY = 80
 
-    def render_snake(self, objToRender):
-        snake = objToRender
+    def add_snake(self, event):
+        """
+        A callback to the SNAKE_BORN event.
+        Add the snake to the corresponding layer.
+        """
+        snake = event.snake
+        r = self.imageFactory.register
+        name = snake.name
+        # image path template
+        appearance = self.snakeAppearance[self.layerStack.size_of('snakes')]
+        self.layerStack.add_to_layer('snakes', snake)
+
+        # register resources
+        imgT = 'img/%s%%s.png' % appearance
+        imgTurn = imgT % '-turn'
+        imgNormal = imgT % ''
+        # Directions:
+        #          0 (0, -1)
+        #          ^
+        #(-1,0)3 <   > 1 (1, 0)
+        #          v
+        #          2 (0, 1)
+        D = ((0, -1), (1, 0), (0, 1), (-1, 0))
+        for d1, angle in zip(D, (180, 90, 0, 270)):
+            # d1 = body[1] - head
+            r((name, ('head', d1)), imgT % '-head', angle)
+            # d1 = tail - body[-2]
+            r((name, ('tail', d1)), imgT % '-tail', angle)
+        # r((name, (d1, d2)), image, angle)
+        # for body[i] or a snake, (d1, d2) = (body[i-1].pos - body[i].pos, body[i+1].pos - body[i].pos)
+        r((name, (D[0], D[1])), imgTurn, 0)
+        r((name, (D[1], D[2])), imgTurn, -90)
+        r((name, (D[2], D[3])), imgTurn, -180)
+        r((name, (D[3], D[0])), imgTurn, -270)
+        r((name, (D[0], D[2])), imgNormal, 0)
+        r((name, (D[1], D[3])), imgNormal, 90)
+        # reverse
+        r((name, (D[1], D[0])), imgTurn, 0)
+        r((name, (D[2], D[1])), imgTurn, -90)
+        r((name, (D[3], D[2])), imgTurn, -180)
+        r((name, (D[0], D[3])), imgTurn, -270)
+        r((name, (D[2], D[0])), imgNormal, 0)
+        r((name, (D[3], D[1])), imgNormal, 90)
+
+    def handle_snake_die(self, event):
+        snake = event.snake
+        # TODO: remove snake from layerStack
+
+    def block2screen(self, pos):
+        return (self.fieldX + pos[0] * self.blkSize, 
+                self.fieldY + pos[1] * self.blkSize)
+
+    def render_snake(self, snake):
         body_len = len(snake.body)
         body = snake.body
 
-        # magic numbers:
-        # 1212 down down
-        # 2121 right right
-        # 0101 left left
-        # 1010 up up
-
-        # 1221 down right
-        # 2112 right down
-        # 2110 right up
-        # 1021 up right
-        # 0110 left up
-        # 0112 left down
-        # 1201 down left
-        # 1001 up left
-
+        g = self.imageFactory.get_image
+        blit = self.window.blit
+        def diff(i, j):
+            (xj, yj) = snake.body[j].pos
+            (xi, yi) = snake.body[i].pos
+            return (xi - xj, yi - yj)
         # Render head
-        self.window.blit(
-            self.imageFactory.getImage(snake.appearance+'-head-'+ \
-                str(snake.direction[0]+1)+str(snake.direction[1]+1)),
-            (self.fieldX+snake.body[0].pos[0]*self.blkSize,
-                self.fieldY+snake.body[0].pos[1]*self.blkSize))
-
-        # Render body
-        i = 1
-        while i != body_len-1:
-            self.window.blit(
-                self.imageFactory.getImage(snake.appearance+'-'+ \
-                    str(body[i].pos[0]-body[i+1].pos[0]+1)+\
-                    str(body[i].pos[1]-body[i+1].pos[1]+1)+\
-                    str(body[i-1].pos[0]-body[i].pos[0]+1)+\
-                    str(body[i-1].pos[1]-body[i].pos[1]+1)),
-                (self.fieldX+body[i].pos[0]*self.blkSize,
-                    self.fieldY+body[i].pos[1]*self.blkSize))
-            i += 1
+        blit(g((snake.name, ('head', diff(1, 0)))), 
+                self.block2screen(snake.head.pos))
+        # Render inner body
+        for i in xrange(1, len(snake.body)-1):
+            blit(g((snake.name, (diff(i-1, i), diff(i+1, i)))), 
+                self.block2screen(snake.body[i].pos))
+        # Render tail
+        blit(g((snake.name, ('tail', diff(-1, -2)))), 
+            self.block2screen(snake.body[-1].pos))
 
     def render_field(self, objToRender):
         field = objToRender
@@ -202,15 +223,6 @@ class Display:
         field.name = 'field'
         field.appearance = 'field'
 
-    def add_snake(self, snake):
-        """
-        Add the snake to the corresponding layer
-        and assign it a name(for render purpose)
-        """
-        snake.name = 'snake'
-        snake.appearance = self.snake_appearance[self.layerStack.size_of('snakes')]
-        self.layerStack.add_to_layer('snakes', snake)
-
     def render(self, world):
         """
         Render the world. This will be called at each update in main loop.
@@ -222,8 +234,11 @@ class Display:
         self.window.fill((255, 255, 255))
 
         # XXX: Why renderCallbacks? Things should be rendered layer by layer.
+        # for item in self.layerStack:
+        #     self.renderCallbacks[item.name](item)
         for item in self.layerStack:
-            self.renderCallbacks[item.name](item)
+            if isinstance(item, Snake):
+                self.render_snake(item)
 
         pygame.display.flip()
 

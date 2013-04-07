@@ -26,6 +26,12 @@ class LayerStack:
     def size_of(self, layerName):
         return len(self.layers[layerName])
 
+    def delete(self, item_to_del):
+        for layerName in self.layersSequence:
+            try:
+                self.layers[layerName].remove(item_to_del)
+            except: pass
+
     def __iter__(self):
         for layerName in self.layersSequence:
             for item in self.layers[layerName]:
@@ -70,15 +76,15 @@ class Display:
         self.blkSize = 20
 
     def init(self, game):
-        game.bind_event(EventTypes.SNAKE_BORN, self.add_snake)
-        game.bind_event(EventTypes.SNAKE_DIE, self.handle_snake_die)
         # TODO: Bind handlers for gameEvents here. 
         #   Interested events: SnakeBorn, SnakeEat, SnakeDie, FoodGen, FoodDisappear
+        game.bind_event(EventTypes.SNAKE_BORN, self.add_snake)
+        game.bind_event(EventTypes.SNAKE_DIE, self.handle_snake_die)
 
         # Initialize layer system
         self.layerStack = LayerStack()
         self.layerStack.push_layer('field')
-        #self.layerStack.push_layer('items')
+        self.layerStack.push_layer('items')
         self.layerStack.push_layer('snakes')
         self.layerStack.push_layer('sky')
 
@@ -156,9 +162,9 @@ class Display:
 
     def handle_snake_die(self, event):
         snake = event.snake
-        # TODO: remove snake from layerStack
+        self.layerStack.delete(snake)
 
-    def block2screen(self, pos):
+    def blk_to_screen(self, pos):
         return (self.fieldX + pos[0] * self.blkSize, 
                 self.fieldY + pos[1] * self.blkSize)
 
@@ -174,14 +180,14 @@ class Display:
             return (xi - xj, yi - yj)
         # Render head
         blit(g((snake.name, ('head', diff(1, 0)))), 
-                self.block2screen(snake.head.pos))
+                self.blk_to_screen(snake.head.pos))
         # Render inner body
         for i in xrange(1, len(snake.body)-1):
             blit(g((snake.name, (diff(i-1, i), diff(i+1, i)))), 
-                self.block2screen(snake.body[i].pos))
+                self.blk_to_screen(snake.body[i].pos))
         # Render tail
         blit(g((snake.name, ('tail', diff(-1, -2)))), 
-            self.block2screen(snake.body[-1].pos))
+            self.blk_to_screen(snake.body[-1].pos))
 
     def render_field(self, objToRender):
         field = objToRender

@@ -4,17 +4,29 @@
 import grids
 from events import EventTypes, SnakeDie, SnakeEat, SnakeMove
 from debug import dprint
+import items
+import random
 
 class World:
     def __init__(self, width, height):
         self.field = grids.Field(width, height)
         self.players = []
         self.snakes = []
-        self.foods = []
+
+    @property
+    def foods(self):
+        return [g for g in self.field if g.type == grids.FOOD]
 
     def __repr__(self):
         return "World(foods={self.foods}, snakes={self.snakes},\
                 \nfield=\n{self.field}".format(self=self)
+
+    def gen_food(self):
+        availGrids = [g for g in self.field if g.type == grids.BLANK]
+        grid = random.choice(availGrids)
+        food = items.Food(pos=grid.pos)
+        grid.type = grids.FOOD
+        grid.content = food
 
     def update(self, eventMgr):
         """
@@ -22,7 +34,7 @@ class World:
         @eventMgr: An EventManager object.
         """
         for player in self.players:
-            player.update()
+            player.update(self)
 
         field = self.field
         for snake in self.snakes:

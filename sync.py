@@ -11,11 +11,11 @@ class Lock:
         return "Lock(pos={}, owner={}, waiting={})".format(self.pos, self.owner, len(self.waitingList))
 
     def acquire(self, target, on_succeed, on_fail):
-        dprint("{} acquire for {}".format(target, self))
+        # dprint("{} acquire for {}".format(target, self))
         self.waitingList.append((target, on_succeed, on_fail))
 
     def release(self, target):
-        dprint("{} release {}".format(target, self))
+        # dprint("{} release {}".format(target, self))
         if self.owner != target:
             raise Exception("{} is not holding the lock. Onwer: {}".format(target, self.owner))
         self.owner = None
@@ -30,7 +30,7 @@ class Lock:
         if self.owner is None:
             if len(self.waitingList) == 1:
                 target, on_succeed, on_fail = self.waitingList.pop()
-                dprint('give', self, 'to', target)
+                # dprint('give', self, 'to', target)
                 if on_succeed:
                     on_succeed()
                 self.owner = target
@@ -38,7 +38,7 @@ class Lock:
         return False
 
     def fail(self):
-        dprint(self, 'failed')
+        # dprint(self, 'failed')
         for target, on_succeed, on_fail in self.waitingList:
             if on_fail:
                 on_fail()

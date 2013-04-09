@@ -149,6 +149,7 @@ class Snake(object):
         tailGrid.type = grids.SNAKE
         tailGrid.content = tail
         dprint('eat')
+        self.world.gen_food()
         tailGrid.lock.acquire(self, None, None)
         tailGrid.lock.update()
 
@@ -181,11 +182,11 @@ class Snake(object):
     def on_acquire_succeed(self):
         # dprint('before update:', self.positions)
         grid = self._nextGrid
-        nextPos = grid.position
+        nextPos = grid.pos
         # test if the grid contains food
         if grid.type == grids.FOOD:
             self.eat(grid)
-            self.eventMgr.emit(SnakeEat(snake=snake, food=grid.food, pos=nextPos))
+            self.eventMgr.emit(SnakeEat(snake=self, food=grid.content, pos=nextPos))
         else:
             self.move_forward()
             self.eventMgr.emit(SnakeMove(snake=self))
@@ -224,9 +225,9 @@ class Snake(object):
         else:
             self._nextGrid = grid
             self.eventMgr = eventMgr
-            dprint('try go forward')
+            # dprint('try go forward')
             grid.lock.acquire(self, self.on_acquire_succeed, 
-                    self.on_acquire_fail('blocked by others', grid.position))
+                    self.on_acquire_fail('blocked by others', grid.pos))
 
     def die(self):
         dprint('die. "Uuuuaaahhhh!!"'.format(self=self))

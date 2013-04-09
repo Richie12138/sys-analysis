@@ -7,7 +7,7 @@ class Player(object):
         self.name = name
         self.snake = None
         self.currentMove = None
-    def update(self):
+    def update(self, world):
         pass
 
     def __repr__(self):

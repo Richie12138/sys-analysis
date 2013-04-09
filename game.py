@@ -56,6 +56,8 @@ class Game:
             
         """
         world = World(*configData['world-size'])
+        world.gen_food()
+        world.gen_food()
         self.snakeDatas = configData['snakes']
         self.world = world
 
@@ -83,13 +85,13 @@ class Game:
         # frame per second
         FPS = 30
         # update per second
-        UPS = 2
+        UPS = 5
         while not self._quit:
             # handle input
             self.inputMgr.update()
             # update game state
             if tickCount % (FPS/UPS) == 0:
-                dprint('before update\n'+str(self.world.field))
+                # dprint('before update\n'+str(self.world.field))
                 self.world.update(self.eventMgr)
             # render using display
             self.display.render(self.world)

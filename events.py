@@ -50,8 +50,8 @@ class SnakeDie(GameEvent):
 
 class SnakeEat(GameEvent):
     type = EventTypes.SNAKE_EAT
-    def __init__(self, snake, food):
-        self.pos = snake.head
+    def __init__(self, snake, food, pos):
+        self.pos = pos
         self.food = food
         self.snake = snake
 
@@ -92,7 +92,7 @@ class EventManager:
 
     def emit(self, event):
         eventType = event.type
-        dprint('emit', event)
+        # dprint('emit', event)
         for handler in self._eventHandlers.get(eventType, []):
             handler(event)
 

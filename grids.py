@@ -8,7 +8,7 @@ Author: Legend
 import sync
 
 # represent the grid status
-BLANK, SNAKE, FOOD = 0, 1, 2
+BLANK, SNAKE, FOOD, WALL = 0, 1, 2, 3
 
 class Directions:
     LEFT = (-1, 0)
@@ -23,14 +23,14 @@ class Grid:
     def __init__(self, x, y):
         #postion: a turple
         #status: the type
-        self.position = (x, y)
+        self.pos = (x, y)
         self.type = BLANK
         self.content = None
         self.lock = sync.Lock()
         self.lock.pos = (x, y)
 
     def print_self(self):
-        print "Grid position: %s \nGrid status: %d \n" % (self.position, self.status)
+        print "Grid pos: %s \nGrid status: %d \n" % (self.pos, self.status)
 
 class Field:
 
@@ -60,11 +60,11 @@ class Field:
         except KeyError:
             print 'KeyError'
 
-    def gen_food_grids(self, x, y):
-        pass
-
-    # get grid
     def get_grid_at(self, x, y):
+        """
+        @x, y: position
+        @return: A `Grid` instance at (x, y)
+        """
         try:
             return self.fields[(x, y)]
         except KeyError:

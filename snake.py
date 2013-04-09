@@ -185,8 +185,8 @@ class Snake(object):
         nextPos = grid.pos
         # test if the grid contains food
         if grid.type == grids.FOOD:
-            self.eat(grid)
             self.eventMgr.emit(SnakeEat(snake=self, food=grid.content, pos=nextPos))
+            self.eat(grid)
         else:
             self.move_forward()
             self.eventMgr.emit(SnakeMove(snake=self))

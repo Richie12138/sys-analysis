@@ -85,8 +85,8 @@ class Display:
         self.stageSize = 400
         self.blkSize = self.stageSize/game.world.field.height
         self.blkT = (self.blkSize, self.blkSize)
-        self.fieldX = 80
-        self.fieldY = 80
+        self.stageX = 80
+        self.stageY = 80
 
         # Initialize layer system
         self.layerStack = LayerStack()
@@ -169,8 +169,8 @@ class Display:
         self.layerStack.delete(snake)
 
     def blk_to_screen(self, pos):
-        return (self.fieldX + pos[0] * self.blkSize, 
-                self.fieldY + pos[1] * self.blkSize)
+        return (self.stageX + pos[0] * self.blkSize, 
+                self.stageY + pos[1] * self.blkSize)
 
     def render_snake(self, snake):
         body_len = len(snake.body)
@@ -200,8 +200,8 @@ class Display:
                 self.window.blit(
                     self.imageFactory.get_image(
                         'grid-'+str(field.get_grid_at(x, y).type)),
-                    (self.fieldX+x*self.blkSize,
-                        self.fieldY+y*self.blkSize))
+                    (self.stageX+x*self.blkSize,
+                        self.stageY+y*self.blkSize))
 
     def add_field(self, field):
         self.layerStack.add_to_layer('field', field)

@@ -108,10 +108,10 @@ if __name__ == '__main__':
                 ]
             }
     cfgDouble = {
-            'world-size': (10, 10),
+            'world-size': (15, 15),
             'snakes':[
-                ((10, 5), Directions.RIGHT, 8),
-                ((10, 15), Directions.LEFT, 8),
+                ((9, 5), Directions.RIGHT, 5),
+                ((10, 4), Directions.LEFT, 5),
                 ]
             }
     cfgHitting = {
@@ -155,5 +155,5 @@ if __name__ == '__main__':
     # test(cfgCircle4)
     # test(cfgHitting)
     #test(cfgHitting3)
-    test(cfgSingle)
-    # test(cfgDouble)
+    #test(cfgSingle)
+    test(cfgDouble)

@@ -4,8 +4,6 @@ import grids
 from snake import Snake
 from events import EventTypes
 
-# TODO cool down mechanism
-
 class LayerStack:
     """
     A stack of layers, to store items with
@@ -82,18 +80,18 @@ class Display:
         game.bind_event(EventTypes.SNAKE_DIE, self.handle_snake_die)
 
         # Initialize stage
-        self.stageSize = 400
+        self.stageSize = 405
         self.blkSize = self.stageSize/game.world.field.height
         self.blkT = (self.blkSize, self.blkSize)
-        self.stageX = 80
+        self.stageX = 40
         self.stageY = 80
 
         # Initialize layer system
         self.layerStack = LayerStack()
         self.layerStack.push_layer('field')
-        self.layerStack.push_layer('items')
         self.layerStack.push_layer('snakes')
         self.layerStack.push_layer('sky')
+        self.layerStack.push_layer('universe')
 
         # rendering callbacks
         self.renderCallbacks = {}
@@ -101,9 +99,8 @@ class Display:
         # All kinds of snakes
         self.snakeAppearance = [
             'snake-red',
-            'snake-red',
             'snake-blue',
-            'snake-green',
+            'snake-purple',
             ]
 
         # Add field
@@ -116,8 +113,11 @@ class Display:
         r('grid-%s'%(grids.SNAKE), 'img/grid-snake.png', size=self.blkT)
         r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT)
 
-        # TODO: Add panel to sky
-
+        # Add panel to sky
+        self.panel = Panel()
+        self.renderCallbacks[self.panel.name] = self.render_panel
+        self.layerStack.add_to_layer('sky', self.panel)
+        r('panel', 'img/panel.png')
 
     def add_snake(self, event):
         """
@@ -193,6 +193,11 @@ class Display:
         blit(g((snake.name, ('tail', diff(-1, -2)))), 
             self.blk_to_screen(snake.body[-1].pos))
 
+    def render_panel(self, objToRender):
+        blit = self.window.blit
+        g = self.imageFactory.get_image
+        blit(g(objToRender.name), (0, 0))
+
     def render_field(self, objToRender):
         field = objToRender
         for y in range(0, field.height):
@@ -226,6 +231,10 @@ class Display:
 
     def quit(self):
         pass
+
+class Panel:
+    def __init__(self):
+        self.name = 'panel'
 
 if __name__ == "__main__":
     """

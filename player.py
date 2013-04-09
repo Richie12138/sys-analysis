@@ -1,3 +1,4 @@
+import pygame
 from grids import Directions
 import grids
 from debug import dprint

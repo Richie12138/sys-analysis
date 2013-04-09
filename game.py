@@ -4,7 +4,7 @@ from pygame.time import Clock
 
 from snake import Snake, Directions
 from world import World
-from player import HumanPlayer, AIPlayer, StupidAIPlayer
+from player import HumanPlayer, AIPlayer
 from display import Display
 from input import InputManager
 from events import EventManager
@@ -29,8 +29,7 @@ class Game:
         if keyLayout:
             player = HumanPlayer(name, self.inputMgr, keyLayout)
         else:
-            # player = AIPlayer(name)
-            player = StupidAIPlayer(name)
+            player = AIPlayer(name)
         # build up a snake
         snakeData = self.snakeDatas[playerCount]
         snake = Snake(self.world, player)
@@ -57,8 +56,7 @@ class Game:
             
         """
         world = World(*configData['world-size'])
-        world.gen_food()
-        world.gen_food()
+        world.gen_food() world.gen_food()
         self.snakeDatas = configData['snakes']
         self.world = world
 
@@ -84,7 +82,7 @@ class Game:
         tickCount = 0
         # TODO: move things like FPS to configure module
         # frame per second
-        FPS = 60
+        FPS = 20
         # update per second
         UPS = 15
         while not self._quit:

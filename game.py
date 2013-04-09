@@ -84,7 +84,7 @@ class Game:
         # frame per second
         FPS = 20
         # update per second
-        UPS = 15
+        UPS = 5
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -101,9 +101,9 @@ class Game:
 
 if __name__ == '__main__':
     cfgSingle = {
-            'world-size': (20, 20),
+            'world-size': (15, 15),
             'snakes':[
-                ((10, 10), Directions.RIGHT, 8),
+                ((8, 8), Directions.RIGHT, 5),
                 ]
             }
     cfgDouble = {

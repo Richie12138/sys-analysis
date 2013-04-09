@@ -142,7 +142,7 @@ class Display:
         r = self.imageFactory.register
         r('grid-%s'%(grids.BLANK), 'img/grid-blank.png', size=self.blkT)
         r('grid-%s'%(grids.SNAKE), 'img/grid-snake.png', size=self.blkT)
-        r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT, cd=10)
+        r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT, cd=5)
 
         # Add panel to sky
         self.panel = Panel()

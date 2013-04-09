@@ -60,7 +60,8 @@ class HumanPlayer(Player):
 
         elif event.type == pygame.KEYUP:
             #If it's a KEYUP, the withdraw a key from historyKeyPressed
-            self.historyKeyPressed.pop()
+            # self.historyKeyPressed.pop()
+            self.historyKeyPressed.remove(event.key)
             if len(self.historyKeyPressed):
                 self.currentMove = self.keyLayout[self.historyKeyPressed[-1]]
             else:

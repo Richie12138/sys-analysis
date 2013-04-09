@@ -56,8 +56,7 @@ class Game:
             
         """
         world = World(*configData['world-size'])
-        world.gen_food()
-        world.gen_food()
+        world.gen_food() world.gen_food()
         self.snakeDatas = configData['snakes']
         self.world = world
 
@@ -83,9 +82,9 @@ class Game:
         tickCount = 0
         # TODO: move things like FPS to configure module
         # frame per second
-        FPS = 30
+        FPS = 20
         # update per second
-        UPS = 5
+        UPS = 15
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -102,16 +101,16 @@ class Game:
 
 if __name__ == '__main__':
     cfgSingle = {
-            'world-size': (10, 10),
+            'world-size': (20, 20),
             'snakes':[
-                ((5, 5), Directions.RIGHT, 4),
+                ((10, 10), Directions.RIGHT, 8),
                 ]
             }
     cfgDouble = {
-            'world-size': (15, 15),
+            'world-size': (20, 20),
             'snakes':[
-                ((9, 5), Directions.RIGHT, 5),
-                ((10, 4), Directions.LEFT, 5),
+                ((10, 5), Directions.RIGHT, 8),
+                ((10, 15), Directions.LEFT, 8),
                 ]
             }
     cfgHitting = {
@@ -145,7 +144,8 @@ if __name__ == '__main__':
         game.inputMgr.bind(input.key_down_type('q'), game.quit)
         game.setup_stage(configData, dsp)
         snakes = configData['snakes']
-        game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
+        # game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
+        game.join_player("Foo")
         if len(snakes) > 1:
             game.join_player("Bar", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
         for i in xrange(2, len(snakes)):

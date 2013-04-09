@@ -7,7 +7,7 @@ from world import World
 from player import HumanPlayer, AIPlayer, StupidAIPlayer
 from display import Display
 from input import InputManager
-from events import EventManager
+from events import EventManager, EventTypes
 from debug import dprint
 import input
 import events
@@ -42,6 +42,13 @@ class Game:
         self.world.players.append(player)
         # emit a SNAKE_BORN event
         self.eventMgr.emit(events.SnakeBorn(snake))
+        # bind gameevent handlers
+        def handler(event):
+            snake = event.snake
+            food = event.food
+            if snake is player.snake:
+                snake.player.score += food.score
+        self.eventMgr.bind(EventTypes.SNAKE_EAT, handler)
 
     def setup_stage(self, configData, display):
         """
@@ -154,6 +161,6 @@ if __name__ == '__main__':
 
     #test(cfgCircle4)
     #test(cfgHitting)
-    #test(cfgHitting3)
-    test(cfgSingle)
+    test(cfgHitting3)
+    #test(cfgSingle)
     #test(cfgDouble)

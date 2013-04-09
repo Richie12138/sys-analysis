@@ -46,12 +46,15 @@ class ImageFactory:
     def __init__(self):
         self.container = {}
 
-    def register(self, appearance, fname, angle=0):
+    def register(self, appearance, fname, angle=0, size=None):
         """
         Link an apperance to an actual image.
         """
-        self.container[appearance] = pygame.transform.rotate(
+        img = pygame.transform.rotate(
                 pygame.image.load(fname).convert_alpha(), angle)
+        if size != None:
+            img = pygame.transform.scale(img, size)
+        self.container[appearance] = img
 
     def get_image(self, appearance):
         """
@@ -72,14 +75,18 @@ class Display:
         self.width = width
         self.height = height
 
-        # should be a constant
-        self.blkSize = 20
-
     def init(self, game):
         # TODO: Bind handlers for gameEvents here. 
         #   Interested events: SnakeBorn, SnakeEat, SnakeDie, FoodGen, FoodDisappear
         game.bind_event(EventTypes.SNAKE_BORN, self.add_snake)
         game.bind_event(EventTypes.SNAKE_DIE, self.handle_snake_die)
+
+        # Initialize stage
+        self.stageSize = 400
+        self.blkSize = self.stageSize/game.world.field.height
+        self.blkT = (self.blkSize, self.blkSize)
+        self.fieldX = 80
+        self.fieldY = 80
 
         # Initialize layer system
         self.layerStack = LayerStack()
@@ -105,15 +112,12 @@ class Display:
         # Register images for sprites
         self.imageFactory = ImageFactory()
         r = self.imageFactory.register
-        r('grid-%s'%(grids.BLANK), 'img/grid-blank.png')
-        r('grid-%s'%(grids.SNAKE), 'img/grid-snake.png')
-        r('grid-%s'%(grids.FOOD), 'img/grid-food.png')
+        r('grid-%s'%(grids.BLANK), 'img/grid-blank.png', size=self.blkT)
+        r('grid-%s'%(grids.SNAKE), 'img/grid-snake.png', size=self.blkT)
+        r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT)
 
         # TODO: Add panel to sky
 
-        # Initialize stage
-        self.fieldX = 80
-        self.fieldY = 80
 
     def add_snake(self, event):
         """
@@ -141,24 +145,24 @@ class Display:
         D = ((0, -1), (1, 0), (0, 1), (-1, 0))
         for d1, angle in zip(D, (180, 90, 0, 270)):
             # d1 = body[1] - head
-            r((name, ('head', d1)), imgT % '-head', angle)
+            r((name, ('head', d1)), imgT % '-head', angle, self.blkT)
             # d1 = tail - body[-2]
-            r((name, ('tail', d1)), imgT % '-tail', angle)
+            r((name, ('tail', d1)), imgT % '-tail', angle, self.blkT)
         # r((name, (d1, d2)), image, angle)
         # for body[i] or a snake, (d1, d2) = (body[i-1].pos - body[i].pos, body[i+1].pos - body[i].pos)
-        r((name, (D[0], D[1])), imgTurn, 0)
-        r((name, (D[1], D[2])), imgTurn, -90)
-        r((name, (D[2], D[3])), imgTurn, -180)
-        r((name, (D[3], D[0])), imgTurn, -270)
-        r((name, (D[0], D[2])), imgNormal, 0)
-        r((name, (D[1], D[3])), imgNormal, 90)
+        r((name, (D[0], D[1])), imgTurn, 0, self.blkT)
+        r((name, (D[1], D[2])), imgTurn, -90, self.blkT)
+        r((name, (D[2], D[3])), imgTurn, -180, self.blkT)
+        r((name, (D[3], D[0])), imgTurn, -270, self.blkT)
+        r((name, (D[0], D[2])), imgNormal, 0, self.blkT)
+        r((name, (D[1], D[3])), imgNormal, 90, self.blkT)
         # reverse
-        r((name, (D[1], D[0])), imgTurn, 0)
-        r((name, (D[2], D[1])), imgTurn, -90)
-        r((name, (D[3], D[2])), imgTurn, -180)
-        r((name, (D[0], D[3])), imgTurn, -270)
-        r((name, (D[2], D[0])), imgNormal, 0)
-        r((name, (D[3], D[1])), imgNormal, 90)
+        r((name, (D[1], D[0])), imgTurn, 0, self.blkT)
+        r((name, (D[2], D[1])), imgTurn, -90, self.blkT)
+        r((name, (D[3], D[2])), imgTurn, -180, self.blkT)
+        r((name, (D[0], D[3])), imgTurn, -270, self.blkT)
+        r((name, (D[2], D[0])), imgNormal, 0, self.blkT)
+        r((name, (D[3], D[1])), imgNormal, 90, self.blkT)
 
     def handle_snake_die(self, event):
         snake = event.snake

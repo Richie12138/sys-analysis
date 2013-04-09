@@ -102,13 +102,13 @@ class Game:
 
 if __name__ == '__main__':
     cfgSingle = {
-            'world-size': (20, 20),
+            'world-size': (10, 10),
             'snakes':[
-                ((10, 10), Directions.RIGHT, 8),
+                ((5, 5), Directions.RIGHT, 4),
                 ]
             }
     cfgDouble = {
-            'world-size': (20, 20),
+            'world-size': (10, 10),
             'snakes':[
                 ((10, 5), Directions.RIGHT, 8),
                 ((10, 15), Directions.LEFT, 8),
@@ -155,5 +155,5 @@ if __name__ == '__main__':
     # test(cfgCircle4)
     # test(cfgHitting)
     #test(cfgHitting3)
-    # test(cfgSingle)
-    test(cfgDouble)
+    test(cfgSingle)
+    # test(cfgDouble)

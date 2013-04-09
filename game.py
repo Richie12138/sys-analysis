@@ -152,8 +152,8 @@ if __name__ == '__main__':
             game.join_player("Player#{}".format(i))
         game.mainloop()
 
-    # test(cfgCircle4)
-    # test(cfgHitting)
+    #test(cfgCircle4)
+    #test(cfgHitting)
     #test(cfgHitting3)
-    #test(cfgSingle)
-    test(cfgDouble)
+    test(cfgSingle)
+    #test(cfgDouble)

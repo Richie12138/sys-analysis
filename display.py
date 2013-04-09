@@ -44,21 +44,52 @@ class ImageFactory:
     def __init__(self):
         self.container = {}
 
-    def register(self, appearance, fname, angle=0, size=None):
+    def register(self, appearance, fname, angle=0, size=None, cd=0):
         """
         Link an apperance to an actual image.
+
+        Warning: If size is not None then it may be
+        an animation, and therefore the image is
+        assumed to be a squre!
         """
-        img = pygame.transform.rotate(
-                pygame.image.load(fname).convert_alpha(), angle)
-        if size != None:
-            img = pygame.transform.scale(img, size)
+        img = Image(fname, angle, size, cd)
         self.container[appearance] = img
 
     def get_image(self, appearance):
         """
         Return a surface for an appearance
         """
-        return self.container[appearance]
+        return self.container[appearance].get()
+
+class Image:
+    """
+    A container for image. This class
+    also support animation.
+    """
+
+    def __init__(self, fname, angle, size, cd):
+        self.img = pygame.transform.rotate(
+                pygame.image.load(fname).convert_alpha(), angle)
+        self.max_cd = cd
+        self.cd = 0
+        if size != None:
+            self.nCells = self.img.get_width()/self.img.get_height()
+            self.size = size
+            self.curCell = 0
+            self.img = pygame.transform.scale(self.img,
+                (self.img.get_width()*size[1]/self.img.get_height(),
+                    size[1]))
+        else:
+            self.size = (self.img.get_width(), self.img.get_height())
+            self.nCells, self.curCell = 1, 0
+
+    def get(self):
+        val = self.img.subsurface(self.curCell*self.size[0], 0, self.size[0], self.size[1])
+        if self.max_cd != 0:
+            self.cd = (self.cd + 1) % self.max_cd
+            if self.cd == 0:
+                self.curCell = (self.curCell + 1)%self.nCells
+        return val
 
 class Display:
     def __init__(self, width=600, height=600):
@@ -111,7 +142,7 @@ class Display:
         r = self.imageFactory.register
         r('grid-%s'%(grids.BLANK), 'img/grid-blank.png', size=self.blkT)
         r('grid-%s'%(grids.SNAKE), 'img/grid-snake.png', size=self.blkT)
-        r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT)
+        r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT, cd=10)
 
         # Add panel to sky
         self.panel = Panel()
@@ -199,6 +230,9 @@ class Display:
         blit(g(objToRender.name), (0, 0))
 
     def render_field(self, objToRender):
+        """
+        TODO: reduce unnecessary grid rendering
+        """
         field = objToRender
         for y in range(0, field.height):
             for x in range(0, field.width):

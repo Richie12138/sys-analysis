@@ -4,7 +4,7 @@ from pygame.time import Clock
 
 from snake import Snake, Directions
 from world import World
-from player import HumanPlayer, AIPlayer
+from player import HumanPlayer, AIPlayer, StupidAIPlayer
 from display import Display
 from input import InputManager
 from events import EventManager
@@ -29,7 +29,8 @@ class Game:
         if keyLayout:
             player = HumanPlayer(name, self.inputMgr, keyLayout)
         else:
-            player = AIPlayer(name)
+            # player = AIPlayer(name)
+            player = StupidAIPlayer(name)
         # build up a snake
         snakeData = self.snakeDatas[playerCount]
         snake = Snake(self.world, player)
@@ -83,9 +84,9 @@ class Game:
         tickCount = 0
         # TODO: move things like FPS to configure module
         # frame per second
-        FPS = 30
+        FPS = 60
         # update per second
-        UPS = 5
+        UPS = 15
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -145,7 +146,8 @@ if __name__ == '__main__':
         game.inputMgr.bind(input.key_down_type('q'), game.quit)
         game.setup_stage(configData, dsp)
         snakes = configData['snakes']
-        game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
+        # game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
+        game.join_player("Foo")
         if len(snakes) > 1:
             game.join_player("Bar", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
         for i in xrange(2, len(snakes)):
@@ -155,5 +157,5 @@ if __name__ == '__main__':
     # test(cfgCircle4)
     # test(cfgHitting)
     #test(cfgHitting3)
-    # test(cfgSingle)
-    test(cfgDouble)
+    test(cfgSingle)
+    # test(cfgDouble)

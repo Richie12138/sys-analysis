@@ -29,7 +29,6 @@ class Game:
         if keyLayout:
             player = HumanPlayer(name, self.inputMgr, keyLayout)
         else:
-            # player = AIPlayer(name)
             player = StupidAIPlayer(name)
         # build up a snake
         snakeData = self.snakeDatas[playerCount]
@@ -57,7 +56,7 @@ class Game:
             
         """
         world = World(*configData['world-size'])
-        world.gen_food() 
+        world.gen_food()
         self.snakeDatas = configData['snakes']
         self.world = world
 
@@ -153,8 +152,8 @@ if __name__ == '__main__':
             game.join_player("Player#{}".format(i))
         game.mainloop()
 
-    # test(cfgCircle4)
-    # test(cfgHitting)
+    #test(cfgCircle4)
+    #test(cfgHitting)
     #test(cfgHitting3)
     test(cfgSingle)
-    # test(cfgDouble)
+    #test(cfgDouble)

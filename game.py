@@ -12,6 +12,7 @@ from debug import dprint
 import random
 import input
 import events
+import pygame
 
 random.seed(0)
 
@@ -79,6 +80,7 @@ class Game:
         # In display, the display should bind callbacks
         # to some game events.
         display.init(self)
+        self.test_bind_key()
 
     def bind_event(self, eventType, callback):
         """
@@ -91,15 +93,24 @@ class Game:
     def quit(self, *args):
         self._quit = True
 
+    def pause(self, event):
+        print self.world.pause
+        self.world.pause = not self.world.pause
+        print self.world.pause
+        print self.world
+
+    def test_bind_key(self):
+        self.inputMgr.bind((pygame.KEYDOWN,input.key('p')),self.pause)
+
     def mainloop(self):
         self._quit = False
         timer = Clock()
         tickCount = 0
         # TODO: move things like FPS to configure module
         # frame per second
-        FPS = 20
+        FPS = 60
         # update per second
-        UPS = 5
+        UPS = 60
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -114,16 +125,6 @@ class Game:
         self.display.quit()
         dprint('quit normally')
 
-if __name__ == '__main__xxx':
-    cfgCircle4 = {
-            'world-size':(20, 20),
-            'snakes': [
-                ((12, 11), Directions.LEFT, 4),
-                ((11, 14), Directions.DOWN, 4),
-                ((14, 15), Directions.RIGHT, 4),
-                ((15, 12), Directions.UP, 4),
-                ]
-            }
 
 class TestBase(object):
     def __init__(self, configData):

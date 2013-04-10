@@ -152,7 +152,7 @@ class Snake(object):
         self.body.append(tail)
         tailGrid.type = grids.SNAKE
         tailGrid.content = tail
-        dprint('eat')
+        # dprint('eat')
         self.world.gen_food()
         tailGrid.lock.acquire(self, None, None)
         tailGrid.lock.update()

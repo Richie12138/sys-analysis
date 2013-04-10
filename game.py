@@ -11,6 +11,7 @@ from events import EventManager, EventTypes
 from debug import dprint
 import input
 import events
+import pygame
 
 class Game:
     # TODO: doc
@@ -29,7 +30,7 @@ class Game:
         if keyLayout:
             player = HumanPlayer(name, self.inputMgr, keyLayout)
         else:
-            player = StupidAIPlayer(name)
+            player = AIPlayer(name)
         # build up a snake
         snakeData = self.snakeDatas[playerCount]
         snake = Snake(self.world, player)
@@ -71,6 +72,7 @@ class Game:
         # In display, the display should bind callbacks
         # to some game events.
         display.init(self)
+        self.test_bind_key()
 
     def bind_event(self, eventType, callback):
         """
@@ -83,15 +85,24 @@ class Game:
     def quit(self, *args):
         self._quit = True
 
+    def pause(self, event):
+        print self.world.pause
+        self.world.pause = not self.world.pause
+        print self.world.pause
+        print self.world
+
+    def test_bind_key(self):
+        self.inputMgr.bind((pygame.KEYDOWN,input.key('p')),self.pause)
+
     def mainloop(self):
         self._quit = False
         timer = Clock()
         tickCount = 0
         # TODO: move things like FPS to configure module
         # frame per second
-        FPS = 20
+        FPS = 60
         # update per second
-        UPS = 5
+        UPS = 60
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -107,6 +118,12 @@ class Game:
         dprint('quit normally')
 
 if __name__ == '__main__':
+    cfgMini = {
+            'world-size': (10, 10),
+            'snakes':[
+                ((5, 5), Directions.RIGHT, 5),
+                ]
+            }
     cfgSingle = {
             'world-size': (15, 15),
             'snakes':[
@@ -154,7 +171,8 @@ if __name__ == '__main__':
         # game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
         game.join_player("Foo")
         if len(snakes) > 1:
-            game.join_player("Bar", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
+            # game.join_player("Bar", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
+            game.join_player("Bar")
         for i in xrange(2, len(snakes)):
             game.join_player("Player#{}".format(i))
         game.mainloop()
@@ -162,5 +180,6 @@ if __name__ == '__main__':
     #test(cfgCircle4)
     #test(cfgHitting)
     #test(cfgHitting3)
-    test(cfgSingle)
-    #test(cfgDouble)
+    # test(cfgSingle)
+    # test(cfgMini)
+    test(cfgDouble)

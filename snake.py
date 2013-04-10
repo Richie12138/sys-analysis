@@ -12,6 +12,8 @@ from events import EventTypes, SnakeDie, SnakeEat, SnakeMove
 class BodySection(object):
     def __init__(self, pos):
         self.pos = pos
+        self.next = None
+        self.prev = None
 
     def __repr__(self):
         return "BodySection(pos={self.pos})".format(self=self)
@@ -148,7 +150,7 @@ class Snake(object):
         self.body.append(tail)
         tailGrid.type = grids.SNAKE
         tailGrid.content = tail
-        dprint('eat')
+        # dprint('eat')
         self.world.gen_food()
         tailGrid.lock.acquire(self, None, None)
         tailGrid.lock.update()

@@ -86,92 +86,101 @@ class HumanPlayer(Player):
             self.mgr.bind((pygame.KEYUP, key), self.move)
 
 
+
+
 class AIPlayer(Player):
     def __init__(self,name ):
         super(AIPlayer, self).__init__(name)
 
-    def get_current_moveable_grid(self,field, head):
+    def get_distance(self, pos1, pos2):
+        return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+
+    def get_current_moveable_grid(self, head, depth, visited):
         currentMoveableGrid = [] 
         for dir in Directions.all:
             nextStep = (head.pos[0] + dir[0], head.pos[1] + dir[1])
-            grid = field.get_grid_at(*nextStep)
-            if grid != None:
-                if grid.type == grids.BLANK and grid.content == None:
-                    currentMoveableGrid.append(grid)
-                if grid.type == grids.FOOD:
-                    currentMoveableGrid.append(grid)
+            grid = self.world.field.get_grid_at(*nextStep)
+            if grid != None and grid.pos not in visited:
+                for i in self.enemySnake:
+                    if self.get_distance(i.head.pos, grid.pos) != 1:
+                        if grid.type == grids.BLANK and grid.content == None:
+                            currentMoveableGrid.append(grid)
+                        elif grid.type == grids.FOOD:
+                            currentMoveableGrid.append(grid)
+                # elif depth != 0:
+                #     if depth > len(self.snake.body):
+                #         depth = 0
+                #     for i in self.snake.body[-1*depth ::]:
+                #         if i.pos == grid.pos:
+                #             currentMoveableGrid.append(grid)
 
         return currentMoveableGrid
 
-    def simulate_to_move(self, field, snake, headGrid):
-        headGrid.type = grids.SNAKE
-        tail = field.get_grid_at(*snake.body[-1].pos)
-        tail.type = grids.BLANK
-        tail.content = None
-        return tail
-
-    def seed_fill(self, virtualField, grid, world):
-        virtualSnake = copy.deepcopy(self.snake)
-        lastTail = None 
+    def seed_fill(self, grid):
         fillNum = 0
+        visited = {grid.pos}
+        depth = 0
         stack = [grid]
-        while len(stack):
+        while stack:
             myGrid = stack.pop()
-            # fill the current grid and simulate to move
-            lastTail = self.simulate_to_move(virtualField, virtualSnake, myGrid)
-            fillNum += 1
-
-            currentMoveableGrid = self.get_current_moveable_grid(virtualField, myGrid)
+            depth += 1
+            fillNum +=1
+            currentMoveableGrid = self.get_current_moveable_grid(myGrid, depth, visited)
+            # print "currentMoveableGrid", len(currentMoveableGrid)
             if len(currentMoveableGrid):
-                # stack += currentMoveableGrid
                 for i in currentMoveableGrid:
-                    #if stack.count(i) == 0:
-                    if i not in stack:
-                        stack.append(i)
-            # have no way to go
+                    visited.add(i.pos)
+                    stack.append(i)
             else:
-                # pass
-                # goback a grid
-                lastTail.type = grids.SNAKE
-        blankCount = 0
-
+                depth -=1
+        
         # count the fillNum was equal to the blank grid or not
-        for i in world.field:
-            if i.type == grids.BLANK:
-                blankCount += 1
-        if blankCount <= fillNum:
-            return True
+        # blankNum = self.world.field.height * self.world.field.width - len(self.snake.body)
+        blankNum = len(self.world.field.fields)
+        blankNum = blankNum - len(self.snake.body)
+
+        if fillNum == blankNum:
+            return fillNum, True
         else:
-            print "expect: %d but got %d" %(blankCount, fillNum)
-            return False
+            dir = (grid.pos[0] - self.snake.head.pos[0], grid.pos[1] - self.snake.head.pos[1], )
+            print "expect: %d but got %d,  dir in %s" %(blankNum, fillNum, str(dir))
+            currentMoveableGrid = self.get_current_moveable_grid(self.snake.head, 0, set())
+            print "currentMoveableGrid: ", currentMoveableGrid
+            print 'grid', grid
+            self.world.test_snake_sync()
+            print self.world
+            return fillNum, False
 
     def update(self, world):
         if not self.snake.alive:
             return
-        virtualField = copy.deepcopy(world.field)
-        # currentMoveableGrid = self.get_current_moveable_grid(virtualField, self.snake.head())
-        currentMoveableGrid = self.get_current_moveable_grid(virtualField, self.snake.body[0])
-
-        for grid in currentMoveableGrid:
-            virtualField = copy.deepcopy(world.field)
-            isOK = self.seed_fill(virtualField, grid, world)
-            if not isOK :
-                currentMoveableGrid.remove(grid)
-                
-        food = world.foods[0]
+        self.world = world
+        self.enemySnake = [i for i in self.world.snakes if i != self.snake]
+        tempMoveableGrid = self.get_current_moveable_grid(self.snake.head, 0, set())
+        num, candidate = -1, None 
+        currentMoveableGrid = []
         distance = 100000
-        for grid in currentMoveableGrid:
-            # manhaton distance
-            temp_d = abs(grid.pos[0] - food.pos[0]) + \
+        food = world.foods[0]
+
+        for grid in tempMoveableGrid:
+            fillNum, isOk = self.seed_fill(grid)
+            if fillNum > num:
+                num = fillNum
+                candidate = grid
+                distance = abs(grid.pos[0] - food.pos[0]) + \
                     abs(grid.pos[1] - food.pos[1])
-            if temp_d < distance:
-                distance = temp_d
-                self.currentMove = (grid.pos[0] - self.snake.head.pos[0], grid.pos[1] - self.snake.head.pos[1])
-                self.snake.update_direction(self.currentMove)
-                print "update: ", self.currentMove
 
+            elif fillNum == num:
+                temp_d = abs(grid.pos[0] - food.pos[0]) + \
+                    abs(grid.pos[1] - food.pos[1])
+                if temp_d < distance:
+                    num = fillNum
+                    candidate = grid
 
+            self.currentMove = (candidate.pos[0] - self.snake.head.pos[0], candidate.pos[1] - self.snake.head.pos[1])
+            self.snake.update_direction(self.currentMove)
 
+ 
 class StupidAIPlayer(Player):
     def dist(self, pos1, pos2):
         return abs(pos1[0]-pos2[0]) + abs(pos1[1] - pos2[1])

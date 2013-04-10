@@ -7,11 +7,14 @@ from debug import dprint
 import items
 import random
 
+random.seed(0)
+
 class World:
     def __init__(self, width, height):
         self.field = grids.Field(width, height)
         self.players = []
         self.snakes = []
+        self.pause = False
 
     @property
     def foods(self):
@@ -33,28 +36,40 @@ class World:
         Update self.players and self.snakes. Emit events via `@eventMgr`
         @eventMgr: An EventManager object.
         """
-        for player in self.players:
-            player.update(self)
+        if not self.pause:
+            for player in self.players:
+                player.update(self)
+            if self.pause: return
 
-        field = self.field
-        for snake in self.snakes:
-            snake.update(eventMgr)
+            field = self.field
+            for snake in self.snakes:
+                snake.update(eventMgr)
 
-        isStatic = False
-        while not isStatic:
-            isStatic = True
-            blockingLocks = []
-            for grid in self.field:
-                lock = grid.lock
-                if lock.update():
-                    isStatic = False
-                elif lock.waitingList:
-                    blockingLocks.append(lock)
-        #TODO: handle the circle situation
-        for lock in blockingLocks:
-            lock.fail()
+            isStatic = False
+            while not isStatic:
+                isStatic = True
+                blockingLocks = []
+                for grid in self.field:
+                    lock = grid.lock
+                    if lock.update():
+                        isStatic = False
+                    elif lock.waitingList:
+                        blockingLocks.append(lock)
+            #TODO: handle the circle situation
+            for lock in blockingLocks:
+                lock.fail()
 
-        self.snakes = [snake for snake in self.snakes if snake.alive]
+            self.snakes = [snake for snake in self.snakes if snake.alive]
+
+    def test_snake_sync(self):
+        snakes = self.snakes
+        for snake in snakes:
+            # dprint(snake)
+            for sec in snake.body:
+                grid = self.field.get_grid_at(*sec.pos)
+                # dprint(sec)
+                assert grid.type == grids.SNAKE
+                assert grid.content == sec
 
 if __name__ == '__main__':
     pass

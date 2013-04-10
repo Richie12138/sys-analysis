@@ -1,10 +1,12 @@
 from __future__ import print_function
 import inspect
+import config
 
 LOG_FILE = 'debug.log'
 _logFile = open(LOG_FILE, 'w')
 
 def dprint(*args, **kwargs):
+    if not config.DEBUG: return 
     frame = inspect.stack()[1]
     modules = []
     stacks = inspect.stack()[1:]

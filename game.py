@@ -13,8 +13,10 @@ import random
 import input
 import events
 import pygame
+import config
 
-random.seed(0)
+if config.FAKE_RANDOM:
+    random.seed(0)
 
 class Game:
     # TODO: doc
@@ -80,7 +82,6 @@ class Game:
         # In display, the display should bind callbacks
         # to some game events.
         display.init(self)
-        self.test_bind_key()
 
     def bind_event(self, eventType, callback):
         """
@@ -94,23 +95,16 @@ class Game:
         self._quit = True
 
     def pause(self, event):
-        print self.world.pause
         self.world.pause = not self.world.pause
-        print self.world.pause
-        print self.world
-
-    def test_bind_key(self):
-        self.inputMgr.bind((pygame.KEYDOWN,input.key('p')),self.pause)
 
     def mainloop(self):
         self._quit = False
         timer = Clock()
         tickCount = 0
-        # TODO: move things like FPS to configure module
         # frame per second
-        FPS = 30
+        FPS = config.FPS
         # update per second
-        UPS = 10
+        UPS = config.UPS
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -124,7 +118,6 @@ class Game:
             tickCount += 1
         self.display.quit()
         dprint('quit normally')
-
 
 class TestBase(object):
     def __init__(self, configData):
@@ -140,6 +133,7 @@ class TestBase(object):
         if not isRun: return
         game = self.game = Game()
         game.inputMgr.bind(input.key_down_type('q'), game.quit)
+        game.inputMgr.bind(input.key_down_type('p'), game.pause)
         self.display = Display()
         game.setup_stage(self.configData, self.display)
 

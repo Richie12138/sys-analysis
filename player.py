@@ -1,3 +1,4 @@
+import pygame
 from grids import Directions
 import grids
 from debug import dprint
@@ -8,6 +9,8 @@ class Player(object):
         self.name = name
         self.snake = None
         self.currentMove = None
+        self.score = 0
+
     def update(self, world):
         pass
 

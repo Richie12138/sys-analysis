@@ -7,7 +7,7 @@ from world import World
 from player import HumanPlayer, AIPlayer, StupidAIPlayer
 from display import Display
 from input import InputManager
-from events import EventManager
+from events import EventManager, EventTypes
 from debug import dprint
 import input
 import events
@@ -43,6 +43,13 @@ class Game:
         self.world.players.append(player)
         # emit a SNAKE_BORN event
         self.eventMgr.emit(events.SnakeBorn(snake))
+        # bind gameevent handlers
+        def handler(event):
+            snake = event.snake
+            food = event.food
+            if snake is player.snake:
+                snake.player.score += food.score
+        self.eventMgr.bind(EventTypes.SNAKE_EAT, handler)
 
     def setup_stage(self, configData, display):
         """
@@ -95,7 +102,11 @@ class Game:
         # frame per second
         FPS = 60
         # update per second
+<<<<<<< HEAD
         UPS = 60
+=======
+        UPS = 5
+>>>>>>> 205a79b2a9e6ed7e40b32ab6fb2a7605a27e78d8
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -118,9 +129,9 @@ if __name__ == '__main__':
                 ]
             }
     cfgSingle = {
-            'world-size': (20, 20),
+            'world-size': (15, 15),
             'snakes':[
-                ((10, 10), Directions.RIGHT, 8),
+                ((8, 8), Directions.RIGHT, 5),
                 ]
             }
     cfgDouble = {

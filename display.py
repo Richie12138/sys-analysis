@@ -45,7 +45,7 @@ class ImageFactory:
     def __init__(self):
         self.container = {}
 
-    def register(self, appearance, fname, angle=0, size=None, cd=0):
+    def register(self, appearance, fname, angle=0, size=None, cd=0, loop=True):
         """
         Link an apperance to an actual image.
 
@@ -53,7 +53,7 @@ class ImageFactory:
         an animation, and therefore the image is
         assumed to be a squre!
         """
-        img = Image(fname, angle, size, cd)
+        img = Image(fname, angle, size, cd, loop)
         self.container[appearance] = img
 
     def get_image(self, appearance):
@@ -68,13 +68,16 @@ class Image:
     also support animation.
     """
 
-    def __init__(self, fname, angle, size, cd):
+    def __init__(self, fname, angle, size, cd, loop):
         self.img = pygame.transform.rotate(
                 pygame.image.load(fname).convert_alpha(), angle)
         self.max_cd = cd
+        self.loop = loop
         self.cd = 0
         if size != None:
-            self.nCells = self.img.get_width()/self.img.get_height()
+            # 900*80/(100*80)
+            self.nCells = self.img.get_width()*size[1]/ \
+                (size[0]*self.img.get_height())
             self.size = size
             self.curCell = 0
             self.img = pygame.transform.scale(self.img,
@@ -89,8 +92,16 @@ class Image:
         if self.max_cd != 0:
             self.cd = (self.cd + 1) % self.max_cd
             if self.cd == 0:
-                self.curCell = (self.curCell + 1)%self.nCells
+                if self.loop == False and self.curCell == self.nCells-1:
+                    pass
+                else: self.curCell = (self.curCell + 1)%self.nCells
         return val
+
+class PlayerStatus:
+    def __init__(self, snake, seq, name):
+        self.player = snake.player
+        self.seq = seq
+        self.name = name
 
 class Display:
     def __init__(self, width=600, height=600):
@@ -123,6 +134,7 @@ class Display:
         self.layerStack = LayerStack()
         self.layerStack.push_layer('field')
         self.layerStack.push_layer('snakes')
+        self.layerStack.push_layer('panel')
         self.layerStack.push_layer('sky')
         self.layerStack.push_layer('universe')
 
@@ -144,12 +156,11 @@ class Display:
         r = self.imageFactory.register
         r('grid-%s'%(grids.BLANK), 'img/grid-blank.png', size=self.blkT)
         r('grid-%s'%(grids.SNAKE), 'img/grid-snake.png', size=self.blkT)
-        r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT, cd=10)
+        r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT, cd=5)
 
-        # Add panel to sky
+        # Add panel to its layer
         self.panel = Panel()
-        self.renderCallbacks[self.panel.name] = self.render_panel
-        self.layerStack.add_to_layer('sky', self.panel)
+        self.layerStack.add_to_layer('panel', self.panel)
         r('panel', 'img/panel.png')
 
     def add_snake(self, event):
@@ -163,12 +174,16 @@ class Display:
         self.renderCallbacks[name] = self.render_snake
         # image path template
         appearance = self.snakeAppearance[self.layerStack.size_of('snakes')]
+        self.renderCallbacks[appearance+'-status'] = \
+            self.render_status
+        self.layerStack.add_to_layer('sky', PlayerStatus(snake, self.layerStack.size_of('snakes'), appearance+'-status'))
         self.layerStack.add_to_layer('snakes', snake)
 
         # register resources
         imgT = 'img/%s%%s.png' % appearance
         imgTurn = imgT % '-turn'
         imgNormal = imgT % ''
+        imgStatus = imgT % '-status'
         # Directions:
         #          0 (0, -1)
         #          ^
@@ -196,6 +211,8 @@ class Display:
         r((name, (D[0], D[3])), imgTurn, -270, self.blkT)
         r((name, (D[2], D[0])), imgNormal, 0, self.blkT)
         r((name, (D[3], D[1])), imgNormal, 90, self.blkT)
+        # status
+        r(appearance+'-status', imgStatus, 0, (100, 80), cd=1, loop=False)
 
     def handle_snake_die(self, event):
         snake = event.snake
@@ -204,6 +221,14 @@ class Display:
     def blk_to_screen(self, pos):
         return (self.stageX + pos[0] * self.blkSize, 
                 self.stageY + pos[1] * self.blkSize)
+
+    def render_status(self, status):
+        g = self.imageFactory.get_image
+        blit = self.window.blit
+
+        # TODO: hard coded
+        blit(g(status.name), (500, 100+status.seq*80))
+        blit(pygame.font.SysFont('comic', 25).render(str(status.player.score), True, (0, 0, 0)), (560, 130+status.seq*80))
 
     def render_snake(self, snake):
         self.game.world.test_snake_sync()
@@ -227,10 +252,14 @@ class Display:
         blit(g((snake.name, ('tail', diff(-1, -2)))), 
             self.blk_to_screen(snake.body[-1].pos))
 
-    def render_panel(self, objToRender):
+    def render_fallback(self, objToRender):
+        """
+        The default callback for rendering objects.
+        """
         blit = self.window.blit
         g = self.imageFactory.get_image
-        blit(g(objToRender.name), (0, 0))
+        blit(g(objToRender.name),
+            (objToRender.renderX, objToRender.renderY))
 
     def render_field(self, objToRender):
         """
@@ -262,7 +291,9 @@ class Display:
         self.window.fill((255, 255, 255, 255))
 
         for item in self.layerStack:
-            self.renderCallbacks[item.name](item)
+            if self.renderCallbacks.has_key(item.name):
+                self.renderCallbacks[item.name](item)
+            else: self.render_fallback(item)
 
         pygame.display.flip()
 
@@ -272,6 +303,7 @@ class Display:
 class Panel:
     def __init__(self):
         self.name = 'panel'
+        self.renderX, self.renderY = 0, 0
 
 if __name__ == "__main__":
     """

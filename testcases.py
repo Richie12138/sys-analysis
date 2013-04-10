@@ -90,13 +90,13 @@ class test_deathmode(TestBase):
     def extra_config(self):
         self.game.join_player(ProgramedPlayer("Foo", 'l'))
         self.game.join_player(ProgramedPlayer("Bar", 'drrrruuuullllddd'))
-        self.game.eventMgr.bind(events.GameEnd.type, self.bark)
+        #self.game.eventMgr.bind(events.GameEnd.type, self.bark)
 test_deathmode({
     'rule': (gamerule.DeathModeRule, ()),
     'world-size':(20, 20), 'snakes': [
         ((12, 11), Directions.LEFT, 4),
         ((11, 14), Directions.DOWN, 4),
-        ]}).run(0)
+        ]}).run(1)
 
 ##################################################################
 class test_fixed_round_mode(test_deathmode):
@@ -119,6 +119,6 @@ test_two_AI({
     'world-size': (15, 15), 'snakes':[
             ((10, 10), Directions.RIGHT, 5), 
             ((9, 9), Directions.RIGHT, 5), 
-        ]}).run(1)
+        ]}).run(0)
 
 #TODO: add test_scoring_mode

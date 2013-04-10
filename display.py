@@ -103,11 +103,34 @@ class PlayerStatus:
         self.snake = snake
         self.seq = seq
         self.name = name
-        game.bind_event(EventTypes.SNAKE_DIE, self.dead_handler)
+        self.game = game
+        game.bind_event(EventTypes.SNAKE_DIE, self.handle_snake_die)
+        game.bind_event(EventTypes.SNAKE_EAT, self.handle_snake_eat)
 
-    def dead_handler(self, event):
+    def handle_snake_die(self, event):
         if event.snake == self.snake:
             self.name = self.name+'-dead'
+            x, y = 400, 80+self.seq*80
+            effect = Effect('effect-die', x, y, 50)
+            self.game.display.layerStack.add_to_layer('universe', effect)
+
+    def handle_snake_eat(self, event):
+        if event.snake == self.snake:
+            x, y = 400, 80+self.seq*80
+            effect = Effect('effect-eat', x, y, 30)
+            self.game.display.layerStack.add_to_layer('universe', effect)
+
+class Effect:
+    def __init__(self, name, renderX, renderY, cd):
+        self.name, self.renderX, self.renderY, self.cd= \
+            name, renderX, renderY, cd
+    
+    def update_cd(self, layerStack):
+        """
+        @layerStack: needed in order to delete itself.
+        """
+        self.cd -= 1
+        if self.cd <= 0: layerStack.delete(self)
 
 class Display:
     def __init__(self, width=600, height=600):
@@ -164,11 +187,17 @@ class Display:
         r('grid-%s'%(grids.BLANK), 'img/grid-blank.png', size=self.blkT)
         r('grid-%s'%(grids.SNAKE), 'img/grid-snake.png', size=self.blkT)
         r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT, cd=5)
+        r('effect-eat', 'img/eat.png')
+        r('effect-die', 'img/die.png')
 
         # Add panel to its layer
         self.panel = Panel()
         self.layerStack.add_to_layer('panel', self.panel)
         r('panel', 'img/panel.png')
+
+        # handle effects. TODO: too long
+        self.renderCallbacks['effect-eat'] = self.render_effect
+        self.renderCallbacks['effect-die'] = self.render_effect
 
     def add_snake(self, event):
         """
@@ -233,7 +262,42 @@ class Display:
         return (self.stageX + pos[0] * self.blkSize, 
                 self.stageY + pos[1] * self.blkSize)
 
-    def render_status(self, status):
+    def add_field(self, field):
+        self.layerStack.add_to_layer('field', field)
+        field.name = 'field'
+        self.renderCallbacks[field.name] = self.render_field
+        field.appearance = 'field'
+
+    def render(self, world):
+        """
+        Render the world. This will be called at each update in main loop.
+        
+        @world: world to render
+        """
+        #
+        # reset
+        self.window.fill((255, 255, 255, 255))
+
+        for item in self.layerStack:
+            if self.renderCallbacks.has_key(item.name):
+                self.renderCallbacks[item.name](item)
+            else: self.render_fallback(item)
+
+        pygame.display.flip()
+
+    def quit(self):
+        pass
+
+    """
+    The following are render callbacks.
+    """
+    def render_effect(self, objToRender):
+        effect = objToRender
+        self.render_fallback(effect)
+        effect.update_cd(self.layerStack)
+
+    def render_status(self, objToRender):
+        status = objToRender
         g = self.imageFactory.get_image
         blit = self.window.blit
 
@@ -286,31 +350,6 @@ class Display:
                     (self.stageX+x*self.blkSize,
                         self.stageY+y*self.blkSize))
 
-    def add_field(self, field):
-        self.layerStack.add_to_layer('field', field)
-        field.name = 'field'
-        self.renderCallbacks[field.name] = self.render_field
-        field.appearance = 'field'
-
-    def render(self, world):
-        """
-        Render the world. This will be called at each update in main loop.
-        
-        @world: world to render
-        """
-        #
-        # reset
-        self.window.fill((255, 255, 255, 255))
-
-        for item in self.layerStack:
-            if self.renderCallbacks.has_key(item.name):
-                self.renderCallbacks[item.name](item)
-            else: self.render_fallback(item)
-
-        pygame.display.flip()
-
-    def quit(self):
-        pass
 
 class Panel:
     def __init__(self):

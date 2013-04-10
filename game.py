@@ -9,6 +9,8 @@ from display import Display
 from input import InputManager
 from events import EventManager, EventTypes
 from debug import dprint
+from gamerule import DeathModeRule
+import gamerule
 import random
 import input
 import events
@@ -69,6 +71,9 @@ class Game:
             
             * world-size: (width, height)
             * snakes: a list, [SnakeData1, SnakeData2, ...]
+            * rule: Optional. A tuple (Rule, args), where `Rule` is GameRule class, 
+                    `args` is the arguments to instantiate this Rule.
+                    Rule defaluts to DeathModeRule.
 
             SnakeData: a tuple (headPos, direction, length)
             
@@ -77,6 +82,12 @@ class Game:
         world.gen_food()
         self.snakeDatas = configData['snakes']
         self.world = world
+        if 'rule' in configData:
+            Rule, args = configData['rule']
+            rule = Rule(self.world, self.eventMgr, *args)
+        else:
+            rule = DeathModeRule(self.world, self.eventMgr)
+        self.rule = rule
 
         self.display = display
         # In display, the display should bind callbacks
@@ -110,7 +121,8 @@ class Game:
             self.inputMgr.update()
             # update game state
             if tickCount % (FPS/UPS) == 0:
-                dprint('before update\n'+str(self.world.field))
+                # dprint('before update\n'+str(self.world.field))
+                self.rule.update()
                 self.world.update(self.eventMgr)
             # render using display
             self.display.render(self.world)
@@ -164,10 +176,10 @@ class test_two_looping(TestBase):
         self.game.join_player(ProgramedPlayer("Foo", 'rrrddllluu'))
         self.game.join_player(ProgramedPlayer("Bar", 'rrrddllluu'))
 test_two_looping({
-            'world-size': (20, 20), 'snakes':[
-                ((10, 5), Directions.RIGHT, 11),
-                ((10, 15), Directions.RIGHT, 10),
-                ]}).run(0)
+    'world-size': (20, 20), 'snakes':[
+        ((10, 5), Directions.RIGHT, 11),
+        ((10, 15), Directions.RIGHT, 10),
+        ]}).run(0)
 
 ##################################################################
 class test_two_looping2(TestBase):
@@ -175,10 +187,10 @@ class test_two_looping2(TestBase):
         self.game.join_player(ProgramedPlayer("Foo", 'dddllluuurrr'))
         self.game.join_player(ProgramedPlayer("Bar", 'uuurrrdddlll'))
 test_two_looping2({
-            'world-size':(10, 10), 'snakes': [
-                ((5, 1), Directions.RIGHT, 6),
-                ((2, 4), Directions.LEFT, 6),
-                ]}).run(0)
+    'world-size':(10, 10), 'snakes': [
+        ((5, 1), Directions.RIGHT, 6),
+        ((2, 4), Directions.LEFT, 6),
+        ]}).run(0)
 
 ##################################################################
 class test_four_looping(TestBase):
@@ -188,9 +200,40 @@ class test_four_looping(TestBase):
         self.game.join_player(ProgramedPlayer("Jax", 'ruuuullllddddrrr'))
         self.game.join_player(ProgramedPlayer("Cot", 'ullllddddrrrruuu'))
 test_four_looping({
-            'world-size':(20, 20), 'snakes': [
-                ((12, 11), Directions.LEFT, 4),
-                ((11, 14), Directions.DOWN, 4),
-                ((14, 15), Directions.RIGHT, 4),
-                ((15, 12), Directions.UP, 4),
-                ]}).run(1)
+    'world-size':(20, 20), 'snakes': [
+        ((12, 11), Directions.LEFT, 4),
+        ((11, 14), Directions.DOWN, 4),
+        ((14, 15), Directions.RIGHT, 4),
+        ((15, 12), Directions.UP, 4),
+        ]}).run(0)
+
+##################################################################
+class test_deathmode(TestBase):
+    def bark(self, gameEnd):
+        print gameEnd
+        self.game.quit()
+    def extra_config(self):
+        self.game.join_player(ProgramedPlayer("Foo", 'l'))
+        self.game.join_player(ProgramedPlayer("Bar", 'drrrruuuullllddd'))
+        self.game.eventMgr.bind(events.GameEnd.type, self.bark)
+test_deathmode({
+    'rule': (DeathModeRule, ()),
+    'world-size':(20, 20), 'snakes': [
+        ((12, 11), Directions.LEFT, 4),
+        ((11, 14), Directions.DOWN, 4),
+        ]}).run(0)
+
+##################################################################
+class test_fixed_round_mode(test_deathmode):
+    def extra_config(self):
+        self.game.join_player(ProgramedPlayer("Foo", 'lddddrrrruuuulll'))
+        self.game.join_player(ProgramedPlayer("Bar", 'drrrruuuullllddd'))
+        self.game.eventMgr.bind(events.GameEnd.type, self.bark)
+test_fixed_round_mode({
+    'rule': (gamerule.FixedRoundModeRule, (100,)),
+    'world-size':(20, 20), 'snakes': [
+        ((12, 11), Directions.LEFT, 4),
+        ((11, 14), Directions.DOWN, 4),
+        ]}).run(1)
+
+#TODO: add test_scoring_mode

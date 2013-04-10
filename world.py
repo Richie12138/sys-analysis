@@ -28,6 +28,19 @@ class World:
         grid.type = grids.FOOD
         grid.content = food
 
+    def _update_until_blocking(self):
+        isStatic = False
+        while not isStatic:
+            isStatic = True
+            blockingLocks = []
+            for grid in self.field:
+                lock = grid.lock
+                if lock.update():
+                    isStatic = False
+                elif lock.waitingList:
+                    blockingLocks.append(lock)
+        return blockingLocks
+
     def update(self, eventMgr):
         """
         Update self.players and self.snakes. Emit events via `@eventMgr`
@@ -40,17 +53,18 @@ class World:
         for snake in self.snakes:
             snake.update(eventMgr)
 
-        isStatic = False
-        while not isStatic:
-            isStatic = True
-            blockingLocks = []
-            for grid in self.field:
-                lock = grid.lock
-                if lock.update():
-                    isStatic = False
-                elif lock.waitingList:
-                    blockingLocks.append(lock)
-        #TODO: handle the circle situation
+        while 1:
+            blockingLocks = self._update_until_blocking()
+            if not blockingLocks: 
+                break
+            for lock in blockingLocks:
+                if lock.owner.body[-1].pos != lock.pos:
+                    # the lock's pos is not a tail pos
+                    lock.fail()
+                    break
+            else:
+                lock.release(lock.owner)
+
         for lock in blockingLocks:
             lock.fail()
 

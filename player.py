@@ -61,6 +61,7 @@ class HumanPlayer(Player):
         if event.type == pygame.KEYDOWN:
             self.currentMove = self.keyLayout[event.key]
             self.historyKeyPressed.append(event.key)
+            # dprint('KEYDOWN:', event.key)
 
         elif event.type == pygame.KEYUP:
             #If it's a KEYUP, the withdraw a key from historyKeyPressed
@@ -72,7 +73,6 @@ class HumanPlayer(Player):
                 self.currentMove = None
         if self.currentMove and self.snake.alive:
             self.snake.update_direction(self.currentMove)
-        dprint(self)
     def bind_keys(self, keyLayout):
         """
         Blind its keyLayout to the inputManager
@@ -217,3 +217,18 @@ class StupidAIPlayer(Player):
                     self.currentMove = dx, dy
                     break
         self.snake.update_direction(self.currentMove)
+
+class ProgramedPlayer(Player):
+    Mapping = {'u': Directions.UP, 'd': Directions.DOWN, 'l': Directions.LEFT, 'r': Directions.RIGHT}
+    def __init__(self, name, actions):
+        super(ProgramedPlayer, self).__init__(name)
+        self.round = 0
+        self.actions = actions.lower()
+
+    def update(self, world):
+        if not self.snake.alive: return
+        self.currentMove = self.Mapping[self.actions[self.round]]
+        self.snake.update_direction(self.currentMove)
+        self.round += 1
+        if self.round == len(self.actions):
+            self.round = 0

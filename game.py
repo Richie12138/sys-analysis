@@ -102,11 +102,7 @@ class Game:
         # frame per second
         FPS = 60
         # update per second
-<<<<<<< HEAD
         UPS = 60
-=======
-        UPS = 5
->>>>>>> 205a79b2a9e6ed7e40b32ab6fb2a7605a27e78d8
         while not self._quit:
             # handle input
             self.inputMgr.update()

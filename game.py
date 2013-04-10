@@ -4,7 +4,7 @@ from pygame.time import Clock
 
 from snake import Snake, Directions
 from world import World
-from player import HumanPlayer, AIPlayer, StupidAIPlayer
+from player import HumanPlayer, AIPlayer
 from display import Display
 from input import InputManager
 from events import EventManager, EventTypes
@@ -103,6 +103,7 @@ class Game:
         FPS = 60
         # update per second
         UPS = 60
+        # UPS = 3
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -181,5 +182,5 @@ if __name__ == '__main__':
     #test(cfgHitting)
     #test(cfgHitting3)
     # test(cfgSingle)
-    # test(cfgMini)
-    test(cfgDouble)
+    test(cfgMini)
+    # test(cfgDouble)

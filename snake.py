@@ -12,6 +12,7 @@ from events import EventTypes, SnakeDie, SnakeEat, SnakeMove
 class BodySection(object):
     def __init__(self, pos):
         self.pos = pos
+        self.secID = None
 
     def __repr__(self):
         return "BodySection(pos={self.pos})".format(self=self)
@@ -79,11 +80,13 @@ class Snake(object):
             grid = self.world.field.get_grid_at(*bsec.pos)
             grid.type = grids.BLANK
             grid.content = None
-            grid.lock.release(self)
+            if grid.lock.owner is self:
+                grid.lock.release(self)
         self.body = []
         for pos in positions:
             bsec = BodySection(pos)
             grid = self.world.field.get_grid_at(*bsec.pos)
+            bsec.secID = len(self.body)
             self.body.append(bsec)
             grid.type = grids.SNAKE
             grid.content = bsec
@@ -142,6 +145,7 @@ class Snake(object):
         grid.content = self.head
         # create the tail section
         tail = BodySection(self.body[-1].pos)
+        tail.secID = len(self.body)
         self.move_forward()
         # allocate a grid for the tail
         tailGrid = self.world.field.get_grid_at(*tail.pos)
@@ -177,7 +181,9 @@ class Snake(object):
             grid.type = grids.SNAKE
             grid.content = bsec
         # now nextPos is the original tail pos
-        get_grid_at(*nextPos).lock.release(self)
+        grid = get_grid_at(*nextPos)
+        if grid.lock.owner is self:
+            grid.lock.release(self)
 
     def on_acquire_succeed(self):
         # dprint('before update:', self.positions)

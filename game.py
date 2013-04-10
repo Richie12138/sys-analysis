@@ -108,9 +108,9 @@ class Game:
         tickCount = 0
         # TODO: move things like FPS to configure module
         # frame per second
-        FPS = 60
+        FPS = 30
         # update per second
-        UPS = 60
+        UPS = 10
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -154,7 +154,7 @@ class test_human(TestBase):
         self.game.join_human_player("Fooo", [K('w'), K('s'), K('a'), K('d')])
 test_human({
     'world-size': (15, 15), 'snakes':[ ((8, 8), Directions.RIGHT, 8), 
-        ]}).run(1)
+        ]}).run(0)
 ##################################################################
 class test_self_looping(TestBase):
     def extra_config(self):
@@ -199,4 +199,4 @@ test_four_looping({
                 ((11, 14), Directions.DOWN, 4),
                 ((14, 15), Directions.RIGHT, 4),
                 ((15, 12), Directions.UP, 4),
-                ]}).run(0)
+                ]}).run(1)

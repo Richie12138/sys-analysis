@@ -232,7 +232,6 @@ class Display:
         blit(pygame.font.SysFont('comic', 25).render(str(status.player.score), True, (0, 0, 0)), (560, 130+status.seq*80))
 
     def render_snake(self, snake):
-        self.game.world.test_snake_sync()
         body_len = len(snake.body)
         body = snake.body
 

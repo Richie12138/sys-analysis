@@ -144,6 +144,7 @@ class Display:
             'snake-red',
             'snake-blue',
             'snake-purple',
+            'snake-blue',
             ]
 
         # Add field

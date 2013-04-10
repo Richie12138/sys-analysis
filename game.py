@@ -161,6 +161,6 @@ if __name__ == '__main__':
 
     #test(cfgCircle4)
     #test(cfgHitting)
-    test(cfgHitting3)
-    #test(cfgSingle)
+    #test(cfgHitting3)
+    test(cfgSingle)
     #test(cfgDouble)

@@ -3,6 +3,7 @@ import world
 import grids
 from snake import Snake
 from events import EventTypes
+from debug import dprint
 
 class LayerStack:
     """
@@ -105,6 +106,7 @@ class Display:
         self.height = height
 
     def init(self, game):
+        self.game = game
         # TODO: Bind handlers for gameEvents here. 
         #   Interested events: SnakeBorn, SnakeEat, SnakeDie, FoodGen, FoodDisappear
         game.bind_event(EventTypes.SNAKE_BORN, self.add_snake)
@@ -204,6 +206,7 @@ class Display:
                 self.stageY + pos[1] * self.blkSize)
 
     def render_snake(self, snake):
+        self.game.world.test_snake_sync()
         body_len = len(snake.body)
         body = snake.body
 

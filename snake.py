@@ -35,6 +35,7 @@ class Snake(object):
         self.world = world
         self.player = player
 
+        self.lastTail = None
         self.body = []
         self.direction = None
         self.alive = True
@@ -168,6 +169,7 @@ class Snake(object):
         nextPos = self.next_head_pos()
         grid = get_grid_at(*nextPos)
         grid.lock.acquire(self, None, None)
+        self.lastTail = self.body[-1]
         for bsec in self.body:
             grid = get_grid_at(*bsec.pos)
             grid.type = grids.BLANK
@@ -232,7 +234,7 @@ class Snake(object):
                     self.on_acquire_fail('blocked by others', grid.pos))
 
     def die(self):
-        dprint('die. "Uuuuaaahhhh!!"'.format(self=self))
+        dprint('die. "Uuuuaaahhhh!!"'.format(self=self), "length: ", len(self.body))
         self.alive = False
         self.set_body([])
 

@@ -29,8 +29,8 @@ class Grid:
         self.lock = sync.Lock()
         self.lock.pos = (x, y)
 
-    def print_self(self):
-        print "Grid pos: %s \nGrid status: %d \n" % (self.pos, self.status)
+    def __repr__(self):
+        return 'Grid(pos={}, type={}'.format(self.pos, self.type)
 
 class Field:
 
@@ -81,11 +81,18 @@ class Field:
         self.gen_snake_grids(snake)
 
     def __repr__(self):
-        chars = {BLANK:'o', FOOD:'F', SNAKE:'S'}
         lines = []
+        def get_c(grid):
+            if grid.type == SNAKE:
+                # bsec = grid.content
+                return 'S'
+            elif grid.type == FOOD:
+                return 'F'
+            elif grid.type == BLANK:
+                return '_'
         for y in xrange(self.height):
-            lines.append(''.join(
-                chars[self.fields[x,y].type] for x in xrange(self.width)))
+            lines.append(' '.join(
+                get_c(self.fields[x,y]) for x in xrange(self.width)))
         return '\n'.join(lines)
 
 # test main function

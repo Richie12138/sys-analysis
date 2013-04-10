@@ -1,0 +1,4 @@
+FPS = 60
+UPS = 30
+DEBUG = 0
+FAKE_RANDOM = 1 

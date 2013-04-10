@@ -147,8 +147,8 @@ class AIPlayer(Player):
             currentMoveableGrid = self.get_current_moveable_grid(self.snake.head, 0, set())
             print "currentMoveableGrid: ", currentMoveableGrid
             print 'grid', grid
-            self.world.test_snake_sync()
-            print self.world
+            #self.world.test_snake_sync()
+            #print self.world
             return fillNum, False
 
     def update(self, world):

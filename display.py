@@ -98,10 +98,16 @@ class Image:
         return val
 
 class PlayerStatus:
-    def __init__(self, snake, seq, name):
+    def __init__(self, snake, seq, name, game):
         self.player = snake.player
+        self.snake = snake
         self.seq = seq
         self.name = name
+        game.bind_event(EventTypes.SNAKE_DIE, self.dead_handler)
+
+    def dead_handler(self, event):
+        if event.snake == self.snake:
+            self.name = self.name+'-dead'
 
 class Display:
     def __init__(self, width=600, height=600):
@@ -176,7 +182,9 @@ class Display:
         appearance = self.snakeAppearance[self.layerStack.size_of('snakes')]
         self.renderCallbacks[appearance+'-status'] = \
             self.render_status
-        self.layerStack.add_to_layer('sky', PlayerStatus(snake, self.layerStack.size_of('snakes'), appearance+'-status'))
+        self.renderCallbacks[appearance+'-status-dead'] = \
+            self.render_status
+        self.layerStack.add_to_layer('sky', PlayerStatus(snake, self.layerStack.size_of('snakes'), appearance+'-status', self.game))
         self.layerStack.add_to_layer('snakes', snake)
 
         # register resources
@@ -184,6 +192,7 @@ class Display:
         imgTurn = imgT % '-turn'
         imgNormal = imgT % ''
         imgStatus = imgT % '-status'
+        imgStatusDead = imgT % '-status-dead'
         # Directions:
         #          0 (0, -1)
         #          ^
@@ -213,6 +222,7 @@ class Display:
         r((name, (D[3], D[1])), imgNormal, 90, self.blkT)
         # status
         r(appearance+'-status', imgStatus, 0, (100, 80), cd=1, loop=False)
+        r(appearance+'-status-dead', imgStatusDead)
 
     def handle_snake_die(self, event):
         snake = event.snake
@@ -231,7 +241,7 @@ class Display:
         blit(pygame.font.SysFont('comic', 25).render(str(status.player.score), True, (0, 0, 0)), (560, 130+status.seq*80))
 
     def render_snake(self, snake):
-        self.game.world.test_snake_sync()
+        #self.game.world.test_snake_sync()
         body_len = len(snake.body)
         body = snake.body
 
@@ -255,6 +265,7 @@ class Display:
     def render_fallback(self, objToRender):
         """
         The default callback for rendering objects.
+        The object should provide renderX and renderY.
         """
         blit = self.window.blit
         g = self.imageFactory.get_image

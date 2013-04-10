@@ -102,7 +102,7 @@ class Game:
         # frame per second
         FPS = 60
         # update per second
-        UPS = 60
+        UPS = 20
         while not self._quit:
             # handle input
             self.inputMgr.update()
@@ -168,8 +168,8 @@ if __name__ == '__main__':
         game.inputMgr.bind(input.key_down_type('q'), game.quit)
         game.setup_stage(configData, dsp)
         snakes = configData['snakes']
-        # game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
-        game.join_player("Foo")
+        game.join_player("Foo", [K('w'), K('s'), K('a'), K('d')])
+        #game.join_player("Foo")
         if len(snakes) > 1:
             # game.join_player("Bar", [K('UP'), K('DOWN'), K('LEFT'), K('RIGHT')])
             game.join_player("Bar")
@@ -181,5 +181,5 @@ if __name__ == '__main__':
     #test(cfgHitting)
     #test(cfgHitting3)
     # test(cfgSingle)
-    # test(cfgMini)
+    #test(cfgMini)
     test(cfgDouble)

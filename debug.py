@@ -5,6 +5,7 @@ LOG_FILE = 'debug.log'
 _logFile = open(LOG_FILE, 'w')
 
 def dprint(*args, **kwargs):
+    return
     frame = inspect.stack()[1]
     modules = []
     stacks = inspect.stack()[1:]

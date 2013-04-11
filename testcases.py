@@ -7,7 +7,7 @@ from display import Display
 from player import HumanPlayer, AIPlayer, StupidAIPlayer, ProgramedPlayer
 from debug import dprint
 
-RUN_ALL = 1
+RUN_ALL = 0
 
 class TestBase(object):
     def __init__(self, configData):
@@ -101,7 +101,7 @@ test_deathmode({
     'world-size':(20, 20), 'snakes': [
         ((12, 11), Directions.LEFT, 4),
         ((11, 14), Directions.DOWN, 4),
-        ]}).run(1)
+        ]}).run(0)
 
 ##################################################################
 class test_fixed_round_mode(test_deathmode):
@@ -124,7 +124,7 @@ test_two_AI({
     'world-size': (15, 15), 'snakes':[
             ((10, 10), Directions.RIGHT, 5), 
             ((9, 9), Directions.RIGHT, 5), 
-        ]}).run(0)
+        ]}).run(1)
 ##################################################################
 class test_one_AI(TestBase):
     def extra_config(self):
@@ -161,6 +161,6 @@ test_two_hitting_odd({
             ((8, 12), Directions.RIGHT, 8), 
             ],
         'rule': (gamerule.ScoringModeRule, (100, )),
-        }).run(1)
+        }).run(0)
 
 #TODO: add test case for ScoringModeRule

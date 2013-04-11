@@ -2,18 +2,20 @@
 # Description:
 
 import grids
-from events import EventTypes, SnakeDie, SnakeEat, SnakeMove
+from events import EventTypes, SnakeDie, SnakeEat, SnakeMove, FoodGen
 from debug import dprint
 import items
 import random
 
 class World:
-    def __init__(self, width, height):
+    def __init__(self, width, height, eventMgr):
         self.field = grids.Field(width, height)
         self.players = []
         self.snakes = []
+        self.eventMgr = eventMgr
 
         self.pause = False
+        self.forbidGenFood = False
 
     @property
     def foods(self):
@@ -24,11 +26,17 @@ class World:
                 \nfield=\n{self.field}".format(self=self)
 
     def gen_food(self):
+        if self.forbidGenFood: return
         availGrids = [g for g in self.field if g.type == grids.BLANK]
-        grid = random.choice(availGrids)
-        food = items.Food(pos=grid.pos)
-        grid.type = grids.FOOD
-        grid.content = food
+        if availGrids:
+            grid = random.choice(availGrids)
+            food = items.Food(pos=grid.pos)
+            grid.type = grids.FOOD
+            grid.content = food
+            self.eventMgr.emit(FoodGen(food, grid.pos))
+        else:
+            # TODO: handle this
+            pass
 
     def _update_until_blocking(self):
         isStatic = False
@@ -49,6 +57,7 @@ class World:
         @eventMgr: An EventManager object.
         """
         if self.pause: return
+        self.eventMgr = eventMgr
 
         for player in self.players:
             player.update(self)
@@ -61,16 +70,22 @@ class World:
             blockingLocks = self._update_until_blocking()
             if not blockingLocks: 
                 break
+            dprint('blockings:', blockingLocks)
+            static = True
             for lock in blockingLocks:
                 if lock.owner.body[-1].pos != lock.pos:
                     # the lock's pos is not a tail pos
                     lock.fail()
-                    break
-            else:
+                    static = False
+            if static:
+                lock = blockingLocks[0]
                 lock.release(lock.owner)
 
         for lock in blockingLocks:
+            dprint(lock, 'fail')
             lock.fail()
+        blockingLocks = self._update_until_blocking()
+        assert not blockingLocks
 
         self.snakes = [snake for snake in self.snakes if snake.alive]
 

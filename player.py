@@ -143,10 +143,10 @@ class AIPlayer(Player):
             return fillNum, True
         else:
             dir = (grid.pos[0] - self.snake.head.pos[0], grid.pos[1] - self.snake.head.pos[1], )
-            print "expect: %d but got %d,  dir in %s" %(blankNum, fillNum, str(dir))
+            dprint("expect: %d but got %d,  dir in %s" %(blankNum, fillNum, str(dir)))
             currentMoveableGrid = self.get_current_moveable_grid(self.snake.head, 0, set())
-            print "currentMoveableGrid: ", currentMoveableGrid
-            print 'grid', grid
+            dprint("currentMoveableGrid: ", currentMoveableGrid)
+            dprint('grid', grid)
             #self.world.test_snake_sync()
             #print self.world
             return fillNum, False

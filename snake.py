@@ -65,7 +65,7 @@ class Snake(object):
         self.set_body(positions)
 
     def __repr__(self):
-        return "Snake(positions={self.positions})".format(self=self)
+        return "Snake(name={self.player.name}, head={self.head})".format(self=self)
 
     def set_body(self, positions):
         """
@@ -169,7 +169,7 @@ class Snake(object):
         get_grid_at = self.world.field.get_grid_at
         nextPos = self.next_head_pos()
         grid = get_grid_at(*nextPos)
-        grid.lock.acquire(self, None, None)
+        # grid.lock.acquire(self, None, None)
         for bsec in self.body:
             grid = get_grid_at(*bsec.pos)
             grid.type = grids.BLANK
@@ -194,8 +194,8 @@ class Snake(object):
             self.eventMgr.emit(SnakeEat(snake=self, food=grid.content, pos=nextPos))
             self.eat(grid)
         else:
+            self.eventMgr.emit(SnakeMove(snake=self, from_=self.head.pos, to_=nextPos))
             self.move_forward()
-            self.eventMgr.emit(SnakeMove(snake=self))
 
     def on_acquire_fail(self, reason, pos):
         def func():

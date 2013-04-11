@@ -120,11 +120,12 @@ class test_two_AI(TestBase):
     def extra_config(self):
         self.game.join_player(AIPlayer("Alice"))
         self.game.join_player(AIPlayer("Bob"))
+        self.game.bind_event(events.EventTypes.SNAKE_DIE, lambda e: dprint('die:', self.game.world))
 test_two_AI({
     'world-size': (10, 10), 'snakes':[
             ((5, 9), Directions.RIGHT, 5), 
-            ((6, 9), Directions.RIGHT, 5), 
-        ]}).run(1)
+            ((5, 8), Directions.RIGHT, 5), 
+        ]}).run(0)
 ##################################################################
 class test_one_AI(TestBase):
     def extra_config(self):
@@ -171,5 +172,27 @@ test_one_AI({
     'world-size': (10, 10), 'snakes':[
             ((5, 5), Directions.RIGHT, 5), 
         ]}).run(0)
+
+##################################################################
+class test_one_AI_large(TestBase):
+    def extra_config(self):
+        self.game.join_player(AIPlayer("Alice"))
+test_one_AI_large({
+    'world-size': (20, 20), 'snakes':[
+            ((5, 5), Directions.RIGHT, 5), 
+        ]}).run(0)
+
+##################################################################
+class test_many_AI(TestBase):
+    def extra_config(self):
+        for i in xrange(5):
+            self.game.join_player(AIPlayer("Foo-{}".format(i)))
+            # self.game.join_player(StupidAIPlayer("Foo-{}".format(i)))
+test_many_AI({
+    'world-size': (16, 16), 
+    'snakes':[((5, i*2), Directions.RIGHT, 5) for i in xrange(20)],
+    'n-food': 1,
+    # 'rule': (gamerule.ScoringModeRule, (5, )),
+    }).run(1)
 
 #TODO: add test case for ScoringModeRule

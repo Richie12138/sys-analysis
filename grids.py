@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 """
 Description: 
   Gird is each grid on the field. Field is combined with grids.
@@ -81,18 +82,20 @@ class Field:
         self.gen_snake_grids(snake)
 
     def __repr__(self):
-        lines = []
-        def get_c(grid):
+        def get_char(grid):
             if grid.type == SNAKE:
-                # bsec = grid.content
-                return 'S'
+                return str(grid.content.secID)
+            elif grid.type == BLANK:
+                return u'\u25A1'.encode('utf8')
             elif grid.type == FOOD:
                 return 'F'
-            elif grid.type == BLANK:
-                return '_'
+            else:
+                return '?'
+        lines = []
+        lines.append('x ' + ' '.join(str(x%10) for x in range(self.width)))
         for y in xrange(self.height):
-            lines.append(' '.join(
-                get_c(self.fields[x,y]) for x in xrange(self.width)))
+            lines.append(str(y%10) + ' ' + ' '.join(
+                get_char(self.fields[x,y]) for x in xrange(self.width)))
         return '\n'.join(lines)
 
 # test main function

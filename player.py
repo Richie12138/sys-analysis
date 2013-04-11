@@ -61,6 +61,7 @@ class HumanPlayer(Player):
         if event.type == pygame.KEYDOWN:
             self.currentMove = self.keyLayout[event.key]
             self.historyKeyPressed.append(event.key)
+            # dprint('KEYDOWN:', event.key)
 
         elif event.type == pygame.KEYUP:
             #If it's a KEYUP, the withdraw a key from historyKeyPressed
@@ -72,7 +73,6 @@ class HumanPlayer(Player):
                 self.currentMove = None
         if self.currentMove and self.snake.alive:
             self.snake.update_direction(self.currentMove)
-        dprint(self)
     def bind_keys(self, keyLayout):
         """
         Blind its keyLayout to the inputManager
@@ -126,7 +126,7 @@ class AIPlayer(Player):
     def seed_fill(self, grid):
         fillNum = 0
         visited = {grid.pos}
-        depth = -1
+        depth = 0
         # if grid.type == grids.FOOD:
         #     depth = 0
         queue = [(grid, depth)]
@@ -185,7 +185,7 @@ class AIPlayer(Player):
             return
         self.world = world
         self.enemySnake = [i for i in self.world.snakes if i != self.snake]
-        tempMoveableGrid = self.get_current_moveable_grid(self.snake.head, -1, set())
+        tempMoveableGrid = self.get_current_moveable_grid(self.snake.head, 0, set())
         num, candidate = -1, None 
         currentMoveableGrid = []
         distance = 100000
@@ -202,12 +202,74 @@ class AIPlayer(Player):
 
             elif fillNum == num:
                 if food_distance < distance:
-                    candidate = grid
-                    distance = food_distance
+                    if random.randint(0,4):
+                        candidate = grid
+                        distance = food_distance
                 elif food_distance == distance:
-                    if random.randint(0,1):
+                    if random.randint(0,4):
                         candidate = grid
                     
             self.currentMove = (candidate.pos[0] - self.snake.head.pos[0], candidate.pos[1] - self.snake.head.pos[1])
             self.snake.update_direction(self.currentMove)
 
+ 
+class StupidAIPlayer(Player):
+    def dist(self, pos1, pos2):
+        return abs(pos1[0]-pos2[0]) + abs(pos1[1] - pos2[1])
+
+    def grid_is_ok(self, pos, depth):
+        grid = self.world.field.get_grid_at(*pos)
+        return grid is not None and grid.type in (grids.BLANK, grids.FOOD)
+
+    def update(self, world):
+        if not self.snake.alive:
+            return 
+        headPos = self.snake.head.pos
+        self.world = world
+        food = min((self.dist(f.pos, headPos), f) for f in world.foods)[1]
+        prev = {}
+        stk = [(0, headPos)]
+        vis = set()
+        while stk:
+            d1, p1 = stk.pop(0)
+            if p1 == food.pos:
+                break
+            for dx, dy in Directions.all:
+                p2 = p1[0] + dx, p1[1] + dy
+                if p2 in vis: continue
+                d2 = d1 + 1
+                if self.grid_is_ok(p2, d2):
+                    stk.append((d2, p2))
+                    prev[p2] = p1
+                    vis.add(p2)
+        p = food.pos
+        path = []
+        while p in prev:
+            path.append(p)
+            p = prev[p]
+        if len(path) > 0:
+            p = path[-1]
+            self.currentMove = (p[0] - headPos[0], p[1] - headPos[1])
+        else:
+            p1 = headPos
+            for dx, dy in Directions.all:
+                p2 = p1[0] + dx, p1[1] + dy
+                if self.grid_is_ok(p2, 0):
+                    self.currentMove = dx, dy
+                    break
+        self.snake.update_direction(self.currentMove)
+
+class ProgramedPlayer(Player):
+    Mapping = {'u': Directions.UP, 'd': Directions.DOWN, 'l': Directions.LEFT, 'r': Directions.RIGHT}
+    def __init__(self, name, actions):
+        super(ProgramedPlayer, self).__init__(name)
+        self.round = 0
+        self.actions = actions.lower()
+
+    def update(self, world):
+        if not self.snake.alive: return
+        self.currentMove = self.Mapping[self.actions[self.round]]
+        self.snake.update_direction(self.currentMove)
+        self.round += 1
+        if self.round == len(self.actions):
+            self.round = 0

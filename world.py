@@ -31,45 +31,47 @@ class World:
         grid.type = grids.FOOD
         grid.content = food
 
+    def _update_until_blocking(self):
+        isStatic = False
+        while not isStatic:
+            isStatic = True
+            blockingLocks = []
+            for grid in self.field:
+                lock = grid.lock
+                if lock.update():
+                    isStatic = False
+                elif lock.waitingList:
+                    blockingLocks.append(lock)
+        return blockingLocks
+
     def update(self, eventMgr):
         """
         Update self.players and self.snakes. Emit events via `@eventMgr`
         @eventMgr: An EventManager object.
         """
-        if not self.pause:
-            for player in self.players:
-                player.update(self)
-            if self.pause: return
+        for player in self.players:
+            player.update(self)
 
-            field = self.field
-            for snake in self.snakes:
-                snake.update(eventMgr)
+        field = self.field
+        for snake in self.snakes:
+            snake.update(eventMgr)
 
-            isStatic = False
-            while not isStatic:
-                isStatic = True
-                blockingLocks = []
-                for grid in self.field:
-                    lock = grid.lock
-                    if lock.update():
-                        isStatic = False
-                    elif lock.waitingList:
-                        blockingLocks.append(lock)
-            #TODO: handle the circle situation
+        while 1:
+            blockingLocks = self._update_until_blocking()
+            if not blockingLocks: 
+                break
             for lock in blockingLocks:
-                lock.fail()
+                if lock.owner.body[-1].pos != lock.pos:
+                    # the lock's pos is not a tail pos
+                    lock.fail()
+                    break
+            else:
+                lock.release(lock.owner)
 
-            self.snakes = [snake for snake in self.snakes if snake.alive]
+        for lock in blockingLocks:
+            lock.fail()
 
-    def test_snake_sync(self):
-        snakes = self.snakes
-        for snake in snakes:
-            # dprint(snake)
-            for sec in snake.body:
-                grid = self.field.get_grid_at(*sec.pos)
-                # dprint(sec)
-                assert grid.type == grids.SNAKE
-                assert grid.content == sec
+        self.snakes = [snake for snake in self.snakes if snake.alive]
 
 if __name__ == '__main__':
     pass

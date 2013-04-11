@@ -3,6 +3,7 @@ from grids import Directions
 import grids
 from debug import dprint
 import copy
+import random
 
 class Player(object):
     def __init__(self, name):
@@ -27,8 +28,7 @@ class HumanPlayer(Player):
                     respectively. You can get these values by `input.key`.
         @mgr: a instance of InputManager
 
-        self Paramater:
-        @self.currentMove:
+        self Paramater: @self.currentMove:
             A string corresponding to 'UP', 'DOWN', 'LEFT', 'RIGHT'
             refer to the Player currentMove direction
         @self keyLayout:
@@ -100,19 +100,26 @@ class AIPlayer(Player):
         for dir in Directions.all:
             nextStep = (head.pos[0] + dir[0], head.pos[1] + dir[1])
             grid = self.world.field.get_grid_at(*nextStep)
-            if grid != None and grid.pos not in visited:
-                for i in self.enemySnake:
-                    if self.get_distance(i.head.pos, grid.pos) != 1:
-                        if grid.type == grids.BLANK and grid.content == None:
-                            currentMoveableGrid.append(grid)
-                        elif grid.type == grids.FOOD:
-                            currentMoveableGrid.append(grid)
-                # elif depth != 0:
-                #     if depth > len(self.snake.body):
-                #         depth = 0
-                #     for i in self.snake.body[-1*depth ::]:
-                #         if i.pos == grid.pos:
-                #             currentMoveableGrid.append(grid)
+
+            if grid != None and grid.pos not in visited :
+                flag = True
+                if depth < 0 and grid == self.snake.lastTail:
+                    flag = False
+                if grid.type == grids.BLANK and grid.content == None and flag:
+                   currentMoveableGrid.append(grid)
+                elif grid.type == grids.FOOD:
+                   currentMoveableGrid.append(grid)
+                elif depth > 0:
+                    if depth >= len(self.snake.body):
+                       depth = 0
+                    for i in self.snake.body[-1*depth ::]:
+                        if i.pos == grid.pos:
+                           currentMoveableGrid.append(grid)
+
+                if len(self.enemySnake):
+                    for i in self.enemySnake:
+                        if grid in currentMoveableGrid and self.get_distance(i.head.pos, grid.pos) == 1:
+                            currentMoveableGrid.remove(grid)
 
         return currentMoveableGrid
 
@@ -120,36 +127,58 @@ class AIPlayer(Player):
         fillNum = 0
         visited = {grid.pos}
         depth = 0
-        stack = [grid]
-        while stack:
-            myGrid = stack.pop()
-            depth += 1
+        # if grid.type == grids.FOOD:
+        #     depth = 0
+        queue = [(grid, depth)]
+        fillGraph = []
+        food_distance = 0
+
+        for k in xrange(self.world.field.width):
+            i = []
+            for j in xrange(self.world.field.height):
+                i.append(0)
+            fillGraph.append(i)
+
+        while queue:
+            Node = queue.pop(0)
+            myGrid = Node[0]
             fillNum +=1
-            currentMoveableGrid = self.get_current_moveable_grid(myGrid, depth, visited)
-            # print "currentMoveableGrid", len(currentMoveableGrid)
+            if myGrid.type == grids.FOOD:
+                food_distance = Node[1]
+
+            # fillGraph[self.world.field.width - myGrid.pos[0]-1][self.world.field.height - myGrid.pos[1] - 1] = Node[1]
+            fillGraph[myGrid.pos[1]][myGrid.pos[0]] = Node[1]
+            currentMoveableGrid = self.get_current_moveable_grid(myGrid, Node[1]+1, visited)
             if len(currentMoveableGrid):
                 for i in currentMoveableGrid:
                     visited.add(i.pos)
-                    stack.append(i)
-            else:
-                depth -=1
+                    queue.append((i, Node[1]+1))
         
-        # count the fillNum was equal to the blank grid or not
-        # blankNum = self.world.field.height * self.world.field.width - len(self.snake.body)
-        blankNum = len(self.world.field.fields)
-        blankNum = blankNum - len(self.snake.body)
 
+        blankNum = len(self.world.field.fields)
+        enemySnakeLength = 0
+        for i in self.enemySnake:
+            enemySnakeLength += len(i)
+        blankNum = blankNum - enemySnakeLength
+
+        direction = {(-1, 0):"LEFT",
+        (1, 0): "RIGHT",
+        (0, -1):"UP",
+        (0, 1):"DOWN"}
+        dir = direction[(grid.pos[0] - self.snake.head.pos[0], grid.pos[1] - self.snake.head.pos[1], )]
+        # print "=========================================================="
+        # print "expect: %d but got %d,  dir in %s" %(blankNum, fillNum, dir)
+        # print "food_distance: ",food_distance 
+        # # self.world.test_snake_sync()
+        # print self.world
+        
         if fillNum == blankNum:
-            return fillNum, True
+            return True,fillNum,food_distance
         else:
-            dir = (grid.pos[0] - self.snake.head.pos[0], grid.pos[1] - self.snake.head.pos[1], )
-            dprint("expect: %d but got %d,  dir in %s" %(blankNum, fillNum, str(dir)))
-            currentMoveableGrid = self.get_current_moveable_grid(self.snake.head, 0, set())
-            dprint("currentMoveableGrid: ", currentMoveableGrid)
-            dprint('grid', grid)
-            #self.world.test_snake_sync()
-            #print self.world
-            return fillNum, False
+            for i in fillGraph:
+                print i
+            print "fillCount, ",fillNum 
+            return False,fillNum,food_distance
 
     def update(self, world):
         if not self.snake.alive:
@@ -163,20 +192,23 @@ class AIPlayer(Player):
         food = world.foods[0]
 
         for grid in tempMoveableGrid:
-            fillNum, isOk = self.seed_fill(grid)
+            isOk, fillNum, food_distance = self.seed_fill(grid)
             if fillNum > num:
                 num = fillNum
                 candidate = grid
+                distance = food_distance
                 distance = abs(grid.pos[0] - food.pos[0]) + \
                     abs(grid.pos[1] - food.pos[1])
 
             elif fillNum == num:
-                temp_d = abs(grid.pos[0] - food.pos[0]) + \
-                    abs(grid.pos[1] - food.pos[1])
-                if temp_d < distance:
-                    num = fillNum
-                    candidate = grid
-
+                if food_distance < distance:
+                    if random.randint(0,4):
+                        candidate = grid
+                        distance = food_distance
+                elif food_distance == distance:
+                    if random.randint(0,4):
+                        candidate = grid
+                    
             self.currentMove = (candidate.pos[0] - self.snake.head.pos[0], candidate.pos[1] - self.snake.head.pos[1])
             self.snake.update_direction(self.currentMove)
 

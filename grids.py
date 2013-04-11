@@ -30,8 +30,8 @@ class Grid:
         self.lock = sync.Lock()
         self.lock.pos = (x, y)
 
-    def print_self(self):
-        print "Grid pos: %s \nGrid status: %d \n" % (self.pos, self.status)
+    def __repr__(self):
+        return 'Grid(pos={}, type={}'.format(self.pos, self.type)
 
 class Field:
 

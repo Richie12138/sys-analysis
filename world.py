@@ -7,6 +7,8 @@ from debug import dprint
 import items
 import random
 
+random.seed(0)
+
 class World:
     def __init__(self, width, height, eventMgr):
         self.field = grids.Field(width, height)

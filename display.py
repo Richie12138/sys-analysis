@@ -106,6 +106,7 @@ class PlayerStatus:
         self.game = game
         game.bind_event(EventTypes.SNAKE_DIE, self.handle_snake_die)
         game.bind_event(EventTypes.SNAKE_EAT, self.handle_snake_eat)
+        game.bind_event(EventTypes.GAME_END, self.handle_snake_win)
 
     def handle_snake_die(self, event):
         if event.snake == self.snake:
@@ -118,6 +119,12 @@ class PlayerStatus:
         if event.snake == self.snake:
             x, y = 400, 80+self.seq*80
             effect = Effect('effect-eat', x, y, 30)
+            self.game.display.layerStack.add_to_layer('universe', effect)
+
+    def handle_snake_win(self, event):
+        if event.winner == self.player:
+            x, y = 320, 50+self.seq*80
+            effect = Effect('effect-win', x, y, 100)
             self.game.display.layerStack.add_to_layer('universe', effect)
 
 class Effect:
@@ -189,6 +196,7 @@ class Display:
         r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT, cd=5)
         r('effect-eat', 'img/eat.png')
         r('effect-die', 'img/die.png')
+        r('effect-win', 'img/win.png')
 
         # Add panel to its layer
         self.panel = Panel()
@@ -198,6 +206,7 @@ class Display:
         # handle effects. TODO: too long
         self.renderCallbacks['effect-eat'] = self.render_effect
         self.renderCallbacks['effect-die'] = self.render_effect
+        self.renderCallbacks['effect-win'] = self.render_effect
 
     def add_snake(self, event):
         """

@@ -5,12 +5,13 @@ class EventTypes:
     DEFAULT_EVENT = 'default-event'
     GAME_EVENT = 'game-event'
     SNAKE_BORN = 'snake-born'
-    SNAKE_DIE = "snake-die"
-    SNAKE_EAT = "snake-eat"
-    SNAKE_MOVE = "snake-move"
-    HIGH_SCORE = "high-score"
-    FOOD_GEN = "food-gen"
-    FOOD_DISAPPEAR = "food-disappear"
+    SNAKE_DIE = 'snake-die'
+    SNAKE_EAT = 'snake-eat'
+    SNAKE_MOVE = 'snake-move'
+    HIGH_SCORE = 'high-score'
+    GAME_END = 'game-end'
+    FOOD_GEN = 'food-gen'
+    FOOD_DISAPPEAR = 'food-disappear'
 
 class Event(object):
     """
@@ -71,6 +72,14 @@ class FoodDisappear(GameEvent):
     def __init__(self, food, pos):
         self.food = food
         self.pos = pos
+
+class GameEnd(GameEvent):
+    type = EventTypes.GAME_END
+    def __init__(self, winner):
+        """
+        @winner: A Player instance
+        """
+        self.winner = winner
 
 class EventManager:
     def __init__(self):

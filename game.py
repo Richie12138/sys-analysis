@@ -9,12 +9,16 @@ from display import Display
 from input import InputManager
 from events import EventManager, EventTypes
 from debug import dprint
+from gamerule import DeathModeRule
+import gamerule
 import random
 import input
 import events
 import pygame
+import config
 
-random.seed(0)
+if config.FAKE_RANDOM:
+    random.seed(0)
 
 class Game:
     # TODO: doc
@@ -67,6 +71,9 @@ class Game:
             
             * world-size: (width, height)
             * snakes: a list, [SnakeData1, SnakeData2, ...]
+            * rule: Optional. A tuple (Rule, args), where `Rule` is GameRule class, 
+                    `args` is the arguments to instantiate this Rule.
+                    Rule defaluts to DeathModeRule.
 
             SnakeData: a tuple (headPos, direction, length)
             
@@ -75,12 +82,17 @@ class Game:
         world.gen_food()
         self.snakeDatas = configData['snakes']
         self.world = world
+        if 'rule' in configData:
+            Rule, args = configData['rule']
+            rule = Rule(self.world, self.eventMgr, *args)
+        else:
+            rule = DeathModeRule(self.world, self.eventMgr)
+        self.rule = rule
 
         self.display = display
         # In display, the display should bind callbacks
         # to some game events.
         display.init(self)
-        self.test_bind_key()
 
     def bind_event(self, eventType, callback):
         """
@@ -94,30 +106,23 @@ class Game:
         self._quit = True
 
     def pause(self, event):
-        print self.world.pause
         self.world.pause = not self.world.pause
-        print self.world.pause
-        print self.world
-
-    def test_bind_key(self):
-        self.inputMgr.bind((pygame.KEYDOWN,input.key('p')),self.pause)
 
     def mainloop(self):
         self._quit = False
         timer = Clock()
         tickCount = 0
-        # TODO: move things like FPS to configure module
         # frame per second
-        FPS = 60
+        FPS = config.FPS
         # update per second
-        UPS = 60
-        # UPS = 3
+        UPS = config.UPS
         while not self._quit:
             # handle input
             self.inputMgr.update()
             # update game state
             if tickCount % (FPS/UPS) == 0:
-                dprint('before update\n'+str(self.world.field))
+                # dprint('before update\n'+str(self.world.field))
+                self.rule.update()
                 self.world.update(self.eventMgr)
             # render using display
             self.display.render(self.world)
@@ -125,92 +130,3 @@ class Game:
             tickCount += 1
         self.display.quit()
         dprint('quit normally')
-
-
-class TestBase(object):
-    def __init__(self, configData):
-        self.configData = configData
-
-    def extra_config(self):
-        """
-        Slot, this will be called by self.mainloop before the mainloop start.
-        """
-        pass
-
-    def run(self, isRun):
-        if not isRun: return
-        game = self.game = Game()
-        game.inputMgr.bind(input.key_down_type('q'), game.quit)
-        self.display = Display()
-        game.setup_stage(self.configData, self.display)
-
-        self.extra_config()
-        game.mainloop()
-
-##################################################################
-class test_human(TestBase):
-    def extra_config(self):
-        K = input.key
-        self.game.join_human_player("Fooo", [K('w'), K('s'), K('a'), K('d')])
-test_human({
-    'world-size': (15, 15), 'snakes':[ ((8, 8), Directions.RIGHT, 8), 
-        ]}).run(0)
-
-##################################################################
-class test_self_looping(TestBase):
-    def extra_config(self):
-        player = ProgramedPlayer("Foo", 'rrddlluu')
-        self.game.join_player(player)
-test_self_looping({
-    'world-size': (15, 15), 'snakes':[ ((8, 8), Directions.RIGHT, 8),
-        ]}).run(0)
-
-##################################################################
-class test_two_looping(TestBase):
-    def extra_config(self):
-        self.game.join_player(ProgramedPlayer("Foo", 'rrrddllluu'))
-        self.game.join_player(ProgramedPlayer("Bar", 'rrrddllluu'))
-test_two_looping({
-            'world-size': (20, 20), 'snakes':[
-                ((10, 5), Directions.RIGHT, 11),
-                ((10, 15), Directions.RIGHT, 10),
-                ]}).run(0)
-
-##################################################################
-class test_two_looping2(TestBase):
-    def extra_config(self):
-        self.game.join_player(ProgramedPlayer("Foo", 'dddllluuurrr'))
-        self.game.join_player(ProgramedPlayer("Bar", 'uuurrrdddlll'))
-test_two_looping2({
-            'world-size':(10, 10), 'snakes': [
-                ((5, 1), Directions.RIGHT, 6),
-                ((2, 4), Directions.LEFT, 6),
-                ]}).run(0)
-
-##################################################################
-class test_four_looping(TestBase):
-    def extra_config(self):
-        self.game.join_player(ProgramedPlayer("Foo", 'lddddrrrruuuulll'))
-        self.game.join_player(ProgramedPlayer("Bar", 'drrrruuuullllddd'))
-        self.game.join_player(ProgramedPlayer("Jax", 'ruuuullllddddrrr'))
-        self.game.join_player(ProgramedPlayer("Cot", 'ullllddddrrrruuu'))
-test_four_looping({
-            'world-size':(20, 20), 'snakes': [
-                ((12, 11), Directions.LEFT, 4),
-                ((11, 14), Directions.DOWN, 4),
-                ((14, 15), Directions.RIGHT, 4),
-                ((15, 12), Directions.UP, 4),
-                ]}).run(0)
-
-##################################################################
-class test_AI(TestBase):
-    def extra_config(self):
-        self.game.join_player(AIPlayer("Foo" ))
-        # self.game.join_player(AIPlayer("Bar"))
-test_AI({
-            'world-size':(20, 20), 'snakes': [
-                ((5, 1), Directions.RIGHT, 6),
-                # ((2, 4), Directions.LEFT, 6),
-                ]}).run(1)
-
-

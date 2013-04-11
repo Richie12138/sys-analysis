@@ -98,10 +98,46 @@ class Image:
         return val
 
 class PlayerStatus:
-    def __init__(self, snake, seq, name):
+    def __init__(self, snake, seq, name, game):
         self.player = snake.player
+        self.snake = snake
         self.seq = seq
         self.name = name
+        self.game = game
+        game.bind_event(EventTypes.SNAKE_DIE, self.handle_snake_die)
+        game.bind_event(EventTypes.SNAKE_EAT, self.handle_snake_eat)
+        game.bind_event(EventTypes.GAME_END, self.handle_snake_win)
+
+    def handle_snake_die(self, event):
+        if event.snake == self.snake:
+            self.name = self.name+'-dead'
+            x, y = 400, 80+self.seq*80
+            effect = Effect('effect-die', x, y, 50)
+            self.game.display.layerStack.add_to_layer('universe', effect)
+
+    def handle_snake_eat(self, event):
+        if event.snake == self.snake:
+            x, y = 400, 80+self.seq*80
+            effect = Effect('effect-eat', x, y, 30)
+            self.game.display.layerStack.add_to_layer('universe', effect)
+
+    def handle_snake_win(self, event):
+        if event.winner == self.player:
+            x, y = 320, 50+self.seq*80
+            effect = Effect('effect-win', x, y, 100)
+            self.game.display.layerStack.add_to_layer('universe', effect)
+
+class Effect:
+    def __init__(self, name, renderX, renderY, cd):
+        self.name, self.renderX, self.renderY, self.cd= \
+            name, renderX, renderY, cd
+    
+    def update_cd(self, layerStack):
+        """
+        @layerStack: needed in order to delete itself.
+        """
+        self.cd -= 1
+        if self.cd <= 0: layerStack.delete(self)
 
 class Display:
     def __init__(self, width=600, height=600):
@@ -158,11 +194,19 @@ class Display:
         r('grid-%s'%(grids.BLANK), 'img/grid-blank.png', size=self.blkT)
         r('grid-%s'%(grids.SNAKE), 'img/grid-snake.png', size=self.blkT)
         r('grid-%s'%(grids.FOOD), 'img/grid-food.png', size=self.blkT, cd=5)
+        r('effect-eat', 'img/eat.png')
+        r('effect-die', 'img/die.png')
+        r('effect-win', 'img/win.png')
 
         # Add panel to its layer
         self.panel = Panel()
         self.layerStack.add_to_layer('panel', self.panel)
         r('panel', 'img/panel.png')
+
+        # handle effects. TODO: too long
+        self.renderCallbacks['effect-eat'] = self.render_effect
+        self.renderCallbacks['effect-die'] = self.render_effect
+        self.renderCallbacks['effect-win'] = self.render_effect
 
     def add_snake(self, event):
         """
@@ -177,7 +221,9 @@ class Display:
         appearance = self.snakeAppearance[self.layerStack.size_of('snakes')]
         self.renderCallbacks[appearance+'-status'] = \
             self.render_status
-        self.layerStack.add_to_layer('sky', PlayerStatus(snake, self.layerStack.size_of('snakes'), appearance+'-status'))
+        self.renderCallbacks[appearance+'-status-dead'] = \
+            self.render_status
+        self.layerStack.add_to_layer('sky', PlayerStatus(snake, self.layerStack.size_of('snakes'), appearance+'-status', self.game))
         self.layerStack.add_to_layer('snakes', snake)
 
         # register resources
@@ -185,6 +231,7 @@ class Display:
         imgTurn = imgT % '-turn'
         imgNormal = imgT % ''
         imgStatus = imgT % '-status'
+        imgStatusDead = imgT % '-status-dead'
         # Directions:
         #          0 (0, -1)
         #          ^
@@ -214,6 +261,7 @@ class Display:
         r((name, (D[3], D[1])), imgNormal, 90, self.blkT)
         # status
         r(appearance+'-status', imgStatus, 0, (100, 80), cd=1, loop=False)
+        r(appearance+'-status-dead', imgStatusDead)
 
     def handle_snake_die(self, event):
         snake = event.snake
@@ -222,57 +270,6 @@ class Display:
     def blk_to_screen(self, pos):
         return (self.stageX + pos[0] * self.blkSize, 
                 self.stageY + pos[1] * self.blkSize)
-
-    def render_status(self, status):
-        g = self.imageFactory.get_image
-        blit = self.window.blit
-
-        # TODO: hard coded
-        blit(g(status.name), (500, 100+status.seq*80))
-        blit(pygame.font.SysFont('comic', 25).render(str(status.player.score), True, (0, 0, 0)), (560, 130+status.seq*80))
-
-    def render_snake(self, snake):
-        body_len = len(snake.body)
-        body = snake.body
-
-        g = self.imageFactory.get_image
-        blit = self.window.blit
-        def diff(i, j):
-            (xj, yj) = snake.body[j].pos
-            (xi, yi) = snake.body[i].pos
-            return (xi - xj, yi - yj)
-        # Render head
-        blit(g((snake.name, ('head', diff(1, 0)))), 
-                self.blk_to_screen(snake.head.pos))
-        # Render inner body
-        for i in xrange(1, len(snake.body)-1):
-            blit(g((snake.name, (diff(i-1, i), diff(i+1, i)))), 
-                self.blk_to_screen(snake.body[i].pos))
-        # Render tail
-        blit(g((snake.name, ('tail', diff(-1, -2)))), 
-            self.blk_to_screen(snake.body[-1].pos))
-
-    def render_fallback(self, objToRender):
-        """
-        The default callback for rendering objects.
-        """
-        blit = self.window.blit
-        g = self.imageFactory.get_image
-        blit(g(objToRender.name),
-            (objToRender.renderX, objToRender.renderY))
-
-    def render_field(self, objToRender):
-        """
-        TODO: reduce unnecessary grid rendering
-        """
-        field = objToRender
-        for y in range(0, field.height):
-            for x in range(0, field.width):
-                self.window.blit(
-                    self.imageFactory.get_image(
-                        'grid-'+str(field.get_grid_at(x, y).type)),
-                    (self.stageX+x*self.blkSize,
-                        self.stageY+y*self.blkSize))
 
     def add_field(self, field):
         self.layerStack.add_to_layer('field', field)
@@ -299,6 +296,69 @@ class Display:
 
     def quit(self):
         pass
+
+    """
+    The following are render callbacks.
+    """
+    def render_effect(self, objToRender):
+        effect = objToRender
+        self.render_fallback(effect)
+        effect.update_cd(self.layerStack)
+
+    def render_status(self, objToRender):
+        status = objToRender
+        g = self.imageFactory.get_image
+        blit = self.window.blit
+
+        # TODO: hard coded
+        blit(g(status.name), (500, 100+status.seq*80))
+        blit(pygame.font.SysFont('comic', 25).render(str(status.player.score), True, (0, 0, 0)), (560, 130+status.seq*80))
+
+    def render_snake(self, snake):
+        #self.game.world.test_snake_sync()
+        body_len = len(snake.body)
+        body = snake.body
+
+        g = self.imageFactory.get_image
+        blit = self.window.blit
+        def diff(i, j):
+            (xj, yj) = snake.body[j].pos
+            (xi, yi) = snake.body[i].pos
+            return (xi - xj, yi - yj)
+        # Render head
+        blit(g((snake.name, ('head', diff(1, 0)))), 
+                self.blk_to_screen(snake.head.pos))
+        # Render inner body
+        for i in xrange(1, len(snake.body)-1):
+            blit(g((snake.name, (diff(i-1, i), diff(i+1, i)))), 
+                self.blk_to_screen(snake.body[i].pos))
+        # Render tail
+        blit(g((snake.name, ('tail', diff(-1, -2)))), 
+            self.blk_to_screen(snake.body[-1].pos))
+
+    def render_fallback(self, objToRender):
+        """
+        The default callback for rendering objects.
+        The object should provide renderX and renderY.
+        """
+        blit = self.window.blit
+        g = self.imageFactory.get_image
+        blit(g(objToRender.name),
+            (objToRender.renderX, objToRender.renderY))
+
+    def render_field(self, objToRender):
+        """
+        TODO: reduce unnecessary grid rendering
+        """
+        field = objToRender
+        for y in range(0, field.height):
+            for x in range(0, field.width):
+                self.window.blit(
+                    self.imageFactory.get_image(
+                        'grid-'+str(field.get_grid_at(x, y).type)),
+                    (self.stageX+x*self.blkSize,
+                        self.stageY+y*self.blkSize))
+
 
 class Panel:
     def __init__(self):

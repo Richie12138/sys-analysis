@@ -16,6 +16,8 @@ class World:
         self.snakes = []
         self.pause = False
 
+        self.pause = False
+
     @property
     def foods(self):
         return [g for g in self.field if g.type == grids.FOOD]
@@ -49,6 +51,8 @@ class World:
         Update self.players and self.snakes. Emit events via `@eventMgr`
         @eventMgr: An EventManager object.
         """
+        if self.pause: return
+
         for player in self.players:
             player.update(self)
 

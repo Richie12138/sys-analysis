@@ -96,7 +96,7 @@ test_deathmode({
     'world-size':(20, 20), 'snakes': [
         ((12, 11), Directions.LEFT, 4),
         ((11, 14), Directions.DOWN, 4),
-        ]}).run(1)
+        ]}).run(0)
 
 ##################################################################
 class test_fixed_round_mode(test_deathmode):
@@ -116,9 +116,20 @@ class test_two_AI(TestBase):
         self.game.join_player(AIPlayer("Alice"))
         self.game.join_player(AIPlayer("Bob"))
 test_two_AI({
-    'world-size': (15, 15), 'snakes':[
-            ((10, 10), Directions.RIGHT, 5), 
-            ((9, 9), Directions.RIGHT, 5), 
+    'world-size': (10, 10), 'snakes':[
+            ((5, 9), Directions.RIGHT, 5), 
+            ((6, 9), Directions.RIGHT, 5), 
         ]}).run(0)
+
+##################################################################
+class test_one_AI(TestBase):
+    def extra_config(self):
+        self.game.join_player(AIPlayer("Alice"))
+test_one_AI({
+    'world-size': (10, 10), 'snakes':[
+            ((5, 5), Directions.RIGHT, 5), 
+        ]}).run(1)
+
+#
 
 #TODO: add test_scoring_mode

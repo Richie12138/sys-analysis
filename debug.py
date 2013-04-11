@@ -17,5 +17,6 @@ def dprint(*args, **kwargs):
     if not modules:
         modules.append('__main__')
     modules = '->'.join(x for x in reversed(modules))
-    print('[{}]: '.format(modules), *args)
-    print('[{}]: '.format(modules), *args, file=_logFile)
+    # print('[{}]: '.format(modules), *args)
+    # print('[{}]: '.format(modules), *args, file=_logFile)
+    print( *args, file=_logFile)

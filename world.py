@@ -4,10 +4,12 @@
 import grids
 from events import EventTypes, SnakeDie, SnakeEat, SnakeMove
 from debug import dprint
+import config
 import items
 import random
 
-random.seed(0)
+if config.FAKE_RANDOM:
+    random.seed(0)
 
 class World:
     def __init__(self, width, height):

@@ -5,6 +5,11 @@ from debug import dprint
 import copy
 import random
 
+direction = {(-1, 0):"LEFT",
+        (1, 0): "RIGHT",
+        (0, -1):"UP",
+        (0, 1):"DOWN"}
+
 class Player(object):
     def __init__(self, name):
         self.name = name
@@ -101,11 +106,11 @@ class AIPlayer(Player):
             nextStep = (head.pos[0] + dir[0], head.pos[1] + dir[1])
             grid = self.world.field.get_grid_at(*nextStep)
 
-            if grid != None and grid.pos not in visited :
+            if grid != None and grid.pos not in visited and grid.pos != self.snake.head.pos :
                 flag = True
                 if depth < 0 and grid == self.snake.lastTail:
                     flag = False
-                if grid.type == grids.BLANK and grid.content == None and flag:
+                if grid.type == grids.BLANK and flag:
                    currentMoveableGrid.append(grid)
                 elif grid.type == grids.FOOD:
                    currentMoveableGrid.append(grid)
@@ -126,7 +131,7 @@ class AIPlayer(Player):
     def seed_fill(self, grid):
         fillNum = 0
         visited = {grid.pos}
-        depth = 0
+        depth = 1
         # if grid.type == grids.FOOD:
         #     depth = 0
         queue = [(grid, depth)]
@@ -142,75 +147,97 @@ class AIPlayer(Player):
         while queue:
             Node = queue.pop(0)
             myGrid = Node[0]
+            depth = Node[1]
             fillNum +=1
             if myGrid.type == grids.FOOD:
                 food_distance = Node[1]
+                depth -=1
 
             # fillGraph[self.world.field.width - myGrid.pos[0]-1][self.world.field.height - myGrid.pos[1] - 1] = Node[1]
             fillGraph[myGrid.pos[1]][myGrid.pos[0]] = Node[1]
-            currentMoveableGrid = self.get_current_moveable_grid(myGrid, Node[1]+1, visited)
+            # currentMoveableGrid = self.get_current_moveable_grid(myGrid, Node[1]+1, visited)
+            currentMoveableGrid = self.get_current_moveable_grid(myGrid, Node[1], visited)
             if len(currentMoveableGrid):
                 for i in currentMoveableGrid:
                     visited.add(i.pos)
-                    queue.append((i, Node[1]+1))
+                    queue.append((i, depth+1))
         
 
         blankNum = len(self.world.field.fields)
         enemySnakeLength = 0
         for i in self.enemySnake:
-            enemySnakeLength += len(i)
+            if i.alive:
+                enemySnakeLength += len(i.body)
         blankNum = blankNum - enemySnakeLength
 
-        direction = {(-1, 0):"LEFT",
-        (1, 0): "RIGHT",
-        (0, -1):"UP",
-        (0, 1):"DOWN"}
         dir = direction[(grid.pos[0] - self.snake.head.pos[0], grid.pos[1] - self.snake.head.pos[1], )]
-        # print "=========================================================="
-        # print "expect: %d but got %d,  dir in %s" %(blankNum, fillNum, dir)
-        # print "food_distance: ",food_distance 
+        # dprint ("==========================================================")
+        # dprint ("expect: %d but got %d,  dir in %s" %(blankNum, fillNum, dir))
+        # dprint ("food_distance: ",food_distance )
+        # dprint ("len of snake:", len(self.snake.body))
+        # s = ""
+        # for i in fillGraph:
+        #     s += str(i);
+        #     s += '\n'
         # # self.world.test_snake_sync()
-        # print self.world
+        # dprint (self.world)
+        # dprint (s)
         
         if fillNum == blankNum:
             return True,fillNum,food_distance
         else:
-            for i in fillGraph:
-                print i
-            print "fillCount, ",fillNum 
-            return False,fillNum,food_distance
+            return False,fillNum,food_distance, fillGraph[self.snake.body[-1].pos[1]][self.snake.body[-1].pos[1]]
 
     def update(self, world):
         if not self.snake.alive:
             return
+        if len(world.foods):
+            food = world.foods[0]
         self.world = world
-        self.enemySnake = [i for i in self.world.snakes if i != self.snake]
-        tempMoveableGrid = self.get_current_moveable_grid(self.snake.head, 0, set())
-        num, candidate = -1, None 
+        self.enemySnake= [i for i in self.world.snakes if (i != self.snake and i.alive)]
+        tempMoveableGrid = self.get_current_moveable_grid(self.snake.head, 1, set())
+        tempGap,num, candidate = -1, -1, None 
         currentMoveableGrid = []
         distance = 100000
-        food = world.foods[0]
 
+        random.shuffle(tempMoveableGrid)
         for grid in tempMoveableGrid:
-            isOk, fillNum, food_distance = self.seed_fill(grid)
+            isOk, fillNum, food_distance, gap = self.seed_fill(grid)
             if fillNum > num:
                 num = fillNum
                 candidate = grid
                 distance = food_distance
-                distance = abs(grid.pos[0] - food.pos[0]) + \
-                    abs(grid.pos[1] - food.pos[1])
+                tempGap = gap
+                # distance = abs(grid.pos[0] - food.pos[0]) + \
+                #     abs(grid.pos[1] - food.pos[1])
 
             elif fillNum == num:
                 if food_distance < distance:
-                    if random.randint(0,4):
+                    # if random.randint(0,4):
+                    candidate = grid
+                    distance = food_distance
+                    tempGap = gap
+                elif food_distance == distance and gap > tempGap:
+                    candidate = grid
+                    distance = food_distance
+                    tempGap = gap
+                elif food_distance > distance and gap > tempGap:
+                    if random.randint(0,6) == 0:
                         candidate = grid
                         distance = food_distance
-                elif food_distance == distance:
-                    if random.randint(0,4):
-                        candidate = grid
+                        tempGap = gap
+
+
+                # elif food_distance == distance:
+                #     if random.randint(0,2):
+                #         candidate = grid
                     
+        if candidate:
             self.currentMove = (candidate.pos[0] - self.snake.head.pos[0], candidate.pos[1] - self.snake.head.pos[1])
             self.snake.update_direction(self.currentMove)
+            dprint("decide to move in dir", direction[self.currentMove])
+        else:
+            print "!!!!!!!!NO choice!!"
 
  
 class StupidAIPlayer(Player):
@@ -273,3 +300,4 @@ class ProgramedPlayer(Player):
         self.round += 1
         if self.round == len(self.actions):
             self.round = 0
+        print world

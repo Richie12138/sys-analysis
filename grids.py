@@ -84,9 +84,14 @@ class Field:
     def __repr__(self):
         def get_char(grid):
             if grid.type == SNAKE:
-                return str(grid.content.secID)
+                # return str(grid.content.secID)
+                if grid.content.secID == 1:
+                    return "H"
+                else:
+                    return 'S'
             elif grid.type == BLANK:
-                return u'\u25A1'.encode('utf8')
+                # return u'\u25A1'.encode('utf8')
+                return '_'
             elif grid.type == FOOD:
                 return 'F'
             else:

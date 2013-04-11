@@ -1,4 +1,5 @@
 from events import GameEnd
+from debug import dprint
 
 class GameRule(object):
     def __init__(self, world, eventMgr):
@@ -37,14 +38,15 @@ class FixedRoundModeRule(DeathModeRule):
             self.set_winner(max(self.world.players, 
                     key=lambda p:p.score if p.snake.alive else None))
 
-class ScoringModeRule(DeathModeRule):
+class ScoringModeRule(GameRule):
     def __init__(self, world, eventMgr, winScore):
-        super(FixedRoundModeRule, self).__init__(world, eventMgr)
+        super(ScoringModeRule, self).__init__(world, eventMgr)
         self.winScore = winScore
 
     def update(self):
         super(ScoringModeRule, self).update()
         if self.end: return
+        # dprint(self.world.players)
         player = max(self.world.players, 
                 key=lambda p: p.score if p.snake.alive else None)
         if player.score >= self.winScore:

@@ -184,7 +184,7 @@ class AIPlayer(Player):
         # dprint (s)
         
         if fillNum == blankNum:
-            return True,fillNum,food_distance
+            return True,fillNum,food_distance,fillGraph[self.snake.body[-1].pos[1]][self.snake.body[-1].pos[1]]
         else:
             return False,fillNum,food_distance, fillGraph[self.snake.body[-1].pos[1]][self.snake.body[-1].pos[1]]
 
@@ -227,10 +227,9 @@ class AIPlayer(Player):
                         distance = food_distance
                         tempGap = gap
 
-
-                # elif food_distance == distance:
-                #     if random.randint(0,2):
-                #         candidate = grid
+                elif food_distance == distance:
+                    if random.randint(0,2):
+                        candidate = grid
                     
         if candidate:
             self.currentMove = (candidate.pos[0] - self.snake.head.pos[0], candidate.pos[1] - self.snake.head.pos[1])

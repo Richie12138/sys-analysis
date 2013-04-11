@@ -85,7 +85,6 @@ class Game:
         self.configData = configData
         world = World(*configData['world-size'], eventMgr=self.eventMgr)
         self.nFood = configData.get('n-food', config.DEFAULT_FOOD_NUM)
-        print 'nfood', self.nFood
         self.snakeDatas = configData['snakes']
         self.world = world
         # round count

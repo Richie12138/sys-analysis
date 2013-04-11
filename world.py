@@ -74,7 +74,7 @@ class World:
             blockingLocks = self._update_until_blocking()
             if not blockingLocks: 
                 break
-            dprint('blockings:', blockingLocks)
+            if config.PRINT_SYNC: dprint('blockings:', blockingLocks)
             static = True
             for lock in blockingLocks:
                 if lock.owner.body[-1].pos != lock.pos:
@@ -82,11 +82,16 @@ class World:
                     lock.fail()
                     static = False
             if static:
+                # break loop manually
                 lock = blockingLocks[0]
+                if config.PRINT_SYNC: dprint('break loop', lock)
                 lock.release(lock.owner)
+                grid = self.field.get_grid_at(*lock.pos)
+                grid.type = grids.BLANK
+                grid.content = None
 
         for lock in blockingLocks:
-            dprint(lock, 'fail')
+            if config.PRINT_SYNC: dprint(lock, 'fail')
             lock.fail()
         blockingLocks = self._update_until_blocking()
         assert not blockingLocks

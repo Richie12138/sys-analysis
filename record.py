@@ -189,12 +189,12 @@ if __name__ == '__main__':
         'rule': (gamerule.ScoringModeRule, (100, )),
         }, display)
     recorder.record()
-    game.join_player(ProgramedPlayer('S1', 'rrrdd'))
-    game.join_player(ProgramedPlayer('S2', 'rrruu'))
+    # game.join_player(ProgramedPlayer('S1', 'rrrdd'))
+    # game.join_player(ProgramedPlayer('S2', 'rrruu'))
     # game.join_player(StupidAIPlayer('John'))
     # game.join_player(StupidAIPlayer('Kate'))
-    # K = input.key
-    # game.join_human_player("Fooo", [K('w'), K('s'), K('a'), K('d')])
+    K = input.key
+    game.join_human_player("Fooo", [K('w'), K('s'), K('a'), K('d')])
     while 1:
         game.mainloop()
         recorder.play()

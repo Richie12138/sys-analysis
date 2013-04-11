@@ -180,7 +180,6 @@ class Display:
         # All kinds of snakes
         self.snakeAppearance = [
             'snake-red',
-            'snake-blue',
             'snake-purple',
             'snake-blue',
             ]
@@ -218,7 +217,7 @@ class Display:
         name = snake.name
         self.renderCallbacks[name] = self.render_snake
         # image path template
-        appearance = self.snakeAppearance[self.layerStack.size_of('snakes')]
+        appearance = self.snakeAppearance[self.layerStack.size_of('snakes') % len(self.snakeAppearance)]
         self.renderCallbacks[appearance+'-status'] = \
             self.render_status
         self.renderCallbacks[appearance+'-status-dead'] = \

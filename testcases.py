@@ -121,9 +121,9 @@ class test_two_AI(TestBase):
         self.game.join_player(AIPlayer("Alice"))
         self.game.join_player(AIPlayer("Bob"))
 test_two_AI({
-    'world-size': (15, 15), 'snakes':[
-            ((10, 10), Directions.RIGHT, 5), 
-            ((9, 9), Directions.RIGHT, 5), 
+    'world-size': (10, 10), 'snakes':[
+            ((5, 9), Directions.RIGHT, 5), 
+            ((6, 9), Directions.RIGHT, 5), 
         ]}).run(1)
 ##################################################################
 class test_one_AI(TestBase):
@@ -162,5 +162,14 @@ test_two_hitting_odd({
             ],
         'rule': (gamerule.ScoringModeRule, (100, )),
         }).run(0)
+
+##################################################################
+class test_one_AI(TestBase):
+    def extra_config(self):
+        self.game.join_player(AIPlayer("Alice"))
+test_one_AI({
+    'world-size': (10, 10), 'snakes':[
+            ((5, 5), Directions.RIGHT, 5), 
+        ]}).run(0)
 
 #TODO: add test case for ScoringModeRule

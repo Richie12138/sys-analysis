@@ -55,8 +55,12 @@
 
     - div.page:
         - h1: Input, Player and Snake
+        - h3: Player
         - p: Subclassed from the Player base class, there are four types of players, namely, HumanPlayer, AIPlayer, StupidAIPlayer, ProgrammedPlayer(Debug purpose)
+        - h3: Input
         - p: The input module adopts the Observer design pattern. Human Players subscribe from the input module, and once there comes a keydown event, a corresponding callback will be invoked.
+        - h3: Snake
+        - p: The player doesn't directly control the snake. The snake simply get the latest input from player, at the end of each time stamp, then decides what to do next.
 
     - div.page:
         - h1: World and Event System

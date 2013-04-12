@@ -107,6 +107,24 @@
             <h1>
             Input, Player and Snake
             </h1>
+            <h3>
+            Player
+            </h3>
+            <p>
+            Subclassed from the Player base class, there are four types of players, namely, HumanPlayer, AIPlayer, StupidAIPlayer, ProgrammedPlayer(Debug purpose)
+            </p>
+            <h3>
+            Input
+            </h3>
+            <p>
+            The input module adopts the Observer design pattern. Human Players subscribe from the input module, and once there comes a keydown event, a corresponding callback will be invoked.
+            </p>
+            <h3>
+            Snake
+            </h3>
+            <p>
+            The player doesn't directly control the snake. The snake simply get the latest input from player, at the end of each time stamp, then decides what to do next.
+            </p>
         </div>
         <div class="page">
             <h1>
@@ -162,7 +180,7 @@ imageFactory.get("grid-food")
             Show Time
             </h1>
             <h3>
-            Thanks everyone in advance
+            Thanks everyone in advance!
             </h3>
         </div>
     </body>

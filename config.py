@@ -1,5 +1,5 @@
 FPS = 60
-UPS = 1
+UPS = 10
 DEBUG = 1
 FAKE_RANDOM = 0 
 RECORD = 1

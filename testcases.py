@@ -189,7 +189,7 @@ class test_one_AI(TestBase):
 test_one_AI({
     'world-size': (10, 10), 'snakes':[
             ((5, 5), Directions.RIGHT, 5), 
-        ]}).run(0)
+        ]}).run(1)
 
 ##################################################################
 class test_one_AI_large(TestBase):

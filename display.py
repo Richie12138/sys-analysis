@@ -1,6 +1,8 @@
 import pygame
 import world
 import grids
+import imageUtils
+import random
 from snake import Snake
 from events import EventTypes
 from debug import dprint
@@ -29,6 +31,7 @@ class LayerStack:
         for layerName in self.layersSequence:
             try:
                 self.layers[layerName].remove(item_to_del)
+                return
             except: pass
 
     def __iter__(self):
@@ -45,15 +48,11 @@ class ImageFactory:
     def __init__(self):
         self.container = {}
 
-    def register(self, appearance, fname, angle=0, size=None, cd=0, loop=True):
+    def register(self, appearance, fname, angle=0, size=None, cd=0, loop=True, hue=0):
         """
         Link an apperance to an actual image.
-
-        Warning: If size is not None then it may be
-        an animation, and therefore the image is
-        assumed to be a squre!
         """
-        img = Image(fname, angle, size, cd, loop)
+        img = imageUtils.Image(fname, angle, size, cd, loop, hue)
         self.container[appearance] = img
 
     def get_image(self, appearance):
@@ -61,41 +60,6 @@ class ImageFactory:
         Return a surface for an appearance
         """
         return self.container[appearance].get()
-
-class Image:
-    """
-    A container for image. This class
-    also support animation.
-    """
-
-    def __init__(self, fname, angle, size, cd, loop):
-        self.img = pygame.transform.rotate(
-                pygame.image.load(fname).convert_alpha(), angle)
-        self.max_cd = cd
-        self.loop = loop
-        self.cd = 0
-        if size != None:
-            # 900*80/(100*80)
-            self.nCells = self.img.get_width()*size[1]/ \
-                (size[0]*self.img.get_height())
-            self.size = size
-            self.curCell = 0
-            self.img = pygame.transform.scale(self.img,
-                (self.img.get_width()*size[1]/self.img.get_height(),
-                    size[1]))
-        else:
-            self.size = (self.img.get_width(), self.img.get_height())
-            self.nCells, self.curCell = 1, 0
-
-    def get(self):
-        val = self.img.subsurface(self.curCell*self.size[0], 0, self.size[0], self.size[1])
-        if self.max_cd != 0:
-            self.cd = (self.cd + 1) % self.max_cd
-            if self.cd == 0:
-                if self.loop == False and self.curCell == self.nCells-1:
-                    pass
-                else: self.curCell = (self.curCell + 1)%self.nCells
-        return val
 
 class PlayerStatus:
     def __init__(self, snake, seq, name, game):
@@ -217,13 +181,13 @@ class Display:
         r = self.imageFactory.register
         name = snake.name
         self.renderCallbacks[name] = self.render_snake
-        # image path template
-        appearance = self.snakeAppearance[self.layerStack.size_of('snakes')]
-        self.renderCallbacks[appearance+'-status'] = \
+        hue = random.choice(range(0, 360))
+        appearance = 'snake-red'
+        self.renderCallbacks[name+'-status'] = \
             self.render_status
-        self.renderCallbacks[appearance+'-status-dead'] = \
+        self.renderCallbacks[name+'-status-dead'] = \
             self.render_status
-        self.layerStack.add_to_layer('sky', PlayerStatus(snake, self.layerStack.size_of('snakes'), appearance+'-status', self.game))
+        self.layerStack.add_to_layer('sky', PlayerStatus(snake, self.layerStack.size_of('snakes'), name+'-status', self.game))
         self.layerStack.add_to_layer('snakes', snake)
 
         # register resources
@@ -241,27 +205,27 @@ class Display:
         D = ((0, -1), (1, 0), (0, 1), (-1, 0))
         for d1, angle in zip(D, (180, 90, 0, 270)):
             # d1 = body[1] - head
-            r((name, ('head', d1)), imgT % '-head', angle, self.blkT)
+            r((name, ('head', d1)), imgT % '-head', angle, self.blkT, hue=hue)
             # d1 = tail - body[-2]
-            r((name, ('tail', d1)), imgT % '-tail', angle, self.blkT)
+            r((name, ('tail', d1)), imgT % '-tail', angle, self.blkT, hue=hue)
         # r((name, (d1, d2)), image, angle)
         # for body[i] or a snake, (d1, d2) = (body[i-1].pos - body[i].pos, body[i+1].pos - body[i].pos)
-        r((name, (D[0], D[1])), imgTurn, 0, self.blkT)
-        r((name, (D[1], D[2])), imgTurn, -90, self.blkT)
-        r((name, (D[2], D[3])), imgTurn, -180, self.blkT)
-        r((name, (D[3], D[0])), imgTurn, -270, self.blkT)
-        r((name, (D[0], D[2])), imgNormal, 0, self.blkT)
-        r((name, (D[1], D[3])), imgNormal, 90, self.blkT)
+        r((name, (D[0], D[1])), imgTurn, 0, self.blkT, hue=hue)
+        r((name, (D[1], D[2])), imgTurn, -90, self.blkT, hue=hue)
+        r((name, (D[2], D[3])), imgTurn, -180, self.blkT, hue=hue)
+        r((name, (D[3], D[0])), imgTurn, -270, self.blkT, hue=hue)
+        r((name, (D[0], D[2])), imgNormal, 0, self.blkT, hue=hue)
+        r((name, (D[1], D[3])), imgNormal, 90, self.blkT, hue=hue)
         # reverse
-        r((name, (D[1], D[0])), imgTurn, 0, self.blkT)
-        r((name, (D[2], D[1])), imgTurn, -90, self.blkT)
-        r((name, (D[3], D[2])), imgTurn, -180, self.blkT)
-        r((name, (D[0], D[3])), imgTurn, -270, self.blkT)
-        r((name, (D[2], D[0])), imgNormal, 0, self.blkT)
-        r((name, (D[3], D[1])), imgNormal, 90, self.blkT)
+        r((name, (D[1], D[0])), imgTurn, 0, self.blkT, hue=hue)
+        r((name, (D[2], D[1])), imgTurn, -90, self.blkT, hue=hue)
+        r((name, (D[3], D[2])), imgTurn, -180, self.blkT, hue=hue)
+        r((name, (D[0], D[3])), imgTurn, -270, self.blkT, hue=hue)
+        r((name, (D[2], D[0])), imgNormal, 0, self.blkT, hue=hue)
+        r((name, (D[3], D[1])), imgNormal, 90, self.blkT, hue=hue)
         # status
-        r(appearance+'-status', imgStatus, 0, (100, 80), cd=1, loop=False)
-        r(appearance+'-status-dead', imgStatusDead)
+        r(name+'-status', imgStatus, 0, (100, 80), cd=1, loop=False, hue=hue)
+        r(name+'-status-dead', imgStatusDead, hue=hue)
 
     def handle_snake_die(self, event):
         snake = event.snake

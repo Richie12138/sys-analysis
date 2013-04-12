@@ -1,7 +1,6 @@
 import numpy as np
 import colorsys
 import pygame
-import pgext
 
 class Image:
     """

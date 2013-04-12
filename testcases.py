@@ -36,9 +36,12 @@ class TestBase(object):
 class test_human(TestBase):
     def extra_config(self):
         K = input.key
-        self.game.join_human_player("Fooo", [K('w'), K('s'), K('a'), K('d')])
+        self.game.join_human_player("Foo", [K('w'), K('s'), K('a'), K('d')])
+        self.game.join_human_player("Bar", [K('i'), K('k'), K('j'), K('l')])
 test_human({
-    'world-size': (15, 15), 'snakes':[ ((8, 8), Directions.RIGHT, 8), 
+    'world-size': (20, 20),
+            'snakes':[ ((8, 8), Directions.RIGHT, 5), 
+                    ((7, 7), Directions.RIGHT, 5), 
         ]}).run(0)
 ##################################################################
 class test_self_looping(TestBase):
@@ -85,7 +88,7 @@ test_four_looping({
         ((11, 14), Directions.DOWN, 4),
         ((14, 15), Directions.RIGHT, 4),
         ((15, 12), Directions.UP, 4),
-        ]}).run(0)
+        ]}).run(1)
 
 ##################################################################
 class test_deathmode(TestBase):

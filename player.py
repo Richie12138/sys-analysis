@@ -135,7 +135,7 @@ class AIPlayer(Player):
                             add = True
 
                 for i in self.enemySnakes:
-                    if add and self.get_distance(i.head.pos, grid.pos) == 1:
+                    if add and self.get_distance(i.head.pos, grid.pos) == 2:
                         add = False
                 if add: currentMoveableGrid.append(grid)
         return currentMoveableGrid

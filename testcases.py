@@ -88,7 +88,7 @@ test_four_looping({
         ((11, 14), Directions.DOWN, 4),
         ((14, 15), Directions.RIGHT, 4),
         ((15, 12), Directions.UP, 4),
-        ]}).run(1)
+        ]}).run(0)
 
 ##################################################################
 class test_deathmode(TestBase):
@@ -196,6 +196,6 @@ test_many_AI({
     'snakes':[((5, i*2), Directions.RIGHT, 5) for i in xrange(20)],
     'n-food': 1,
     # 'rule': (gamerule.ScoringModeRule, (5, )),
-    }).run(0)
+    }).run(1)
 
 #TODO: add test case for ScoringModeRule

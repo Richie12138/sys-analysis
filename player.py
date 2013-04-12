@@ -202,7 +202,9 @@ class AIPlayer(Player):
                 self.food_count = 0
             if world.foods[0].pos == self.food.pos:
                 self.food_count += 1
-                print "food_count, ", self.food_count
+                # print "food_count, mulipyer", self.food_count, float(self.food_count)/len(self.snake.body)
+
+            self.multipier = float(self.food_count)/len(self.snake.body)
 
         self.world = world
         self.enemySnakes= [i for i in self.world.snakes if (i != self.snake and i.alive)]
@@ -231,21 +233,19 @@ class AIPlayer(Player):
                     distance = food_distance
                     tempGap = gap
                 elif food_distance > distance and gap > tempGap:
-                    choice = 3
+                    choice = 10
                     if len(self.enemySnakes) == 0:
-                        choice = 2
-                        if self.food_count >= 350:
-                            choice = 1
-                        if self.food_count >= 400:
-                            choice = 0
+                        choice = 9
+                        if self.multipier>= 1.5:
+                            choice = 2
                     if random.randint(0,choice) == 0:
                         candidate = grid
                         distance = food_distance
                         tempGap = gap
 
-                # elif food_distance == distance:
-                #     if random.randint(0,2):
-                #         candidate = grid
+                elif food_distance == distance:
+                    if random.randint(0,2):
+                        candidate = grid
                     
         if candidate:
             self.currentMove = (candidate.pos[0] - self.snake.head.pos[0], 

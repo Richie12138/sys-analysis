@@ -2,6 +2,7 @@ import config
 import re
 import pygame
 import math
+import random
 import crayonstroke
 import input
 import gamerule
@@ -117,7 +118,7 @@ class Menu(object):
         colorMatchedText = (189, 39, 85)
         font = self.font
         # draw base circle
-        crayonstroke.circle(surface, (cx, cy), R0, color)
+        crayonstroke.circle(surface, (cx, cy), R0 + random.randint(-5, 5), color)
         txt = self.baseFont.render(self.name + ': '+ self.string, 1, colorText)
         w, h = txt.get_size()
         surface.blit(txt, (cx - w/2, cy - h/2))
@@ -137,7 +138,7 @@ class Menu(object):
                         match.string[match.end():], 1, colorText)
                 w, h = self.font.size(match.string)
                 R = max(R1, max(w, h)/2 + 10)
-                crayonstroke.circle(surface, (x, y), R, colorSub)
+                crayonstroke.circle(surface, (x, y), R + random.randint(-2, 2), colorSub)
                 surface.blit(txtMatched, (x - w/2, y - h/2))
                 surface.blit(txtRest, (x - w/2 + txtMatched.get_size()[0], y - h/2))
                 a += da

@@ -38,68 +38,52 @@
         - p: The nature of grid-based game--accuracy is in need.
         - p: Sychronization problem
         # TODO some screenshots needed
-        - img:
-            - img.span7[]:
-                - alt: "test_two_looping.jpg"
-                - src: img/test_two_looping.png
+        - img.span7[]:
+            - alt: "test_two_looping.jpg"
+            - src: img/test_two_looping.png
     - div.page:
         - h1: Game Logistics Analysis and Implementation Issue (Cont.)
         - p: The nature of grid-based game--accuracy is in need.
         - p: Sychronization problem
         # TODO some screenshots needed
-        - img:
-            - img.span7[]:
-                - alt: "test_four_looping.jpg"
-                - src: img/test_four_looping.png
-
-    - div.page:
-        - h1: Game Logistics Analysis and Implementation Issue (Cont.)
-        - p: The nature of grid-based game--accuracy is in need.
-        - p: Sychronization problem
-        # TODO some screenshots needed
-        - img:
-            - img.span7[]:
-                - alt: "test_self_looping.jpg"
-                - src: img/test_self_looping.png
+        - img.span7[]:
+            - alt: "test_four_looping.jpg"
+            - src: img/test_four_looping.png
 
     - div.page:
         - h1: Game Logistics Analysis and Implementation Issue (Cont.)
         - p: The nature of grid-based game--accuracy is in need.
         - p: Sychronization problem
         # TODO some screenshots needed
-        - img:
-            - img.span7[]:
-                - alt: "test_two_hitting.jpg"
-                - src: img/test_for_two_hitting.png
+        - img.span7[]:
+            - alt: "test_self_looping.jpg"
+            - src: img/test_self_looping.png
 
     - div.page:
         - h1: Game Logistics Analysis and Implementation Issue (Cont.)
         - p: The nature of grid-based game--accuracy is in need.
         - p: Sychronization problem
         # TODO some screenshots needed
-        - img:
-            - img.span7[]:
-                - alt: "test_two_hitting_tail.jpg"
-                - src: img/test_for_two_hitting_tail.png
+        - img.span7[]:
+            - alt: "test_two_hitting.jpg"
+            - src: img/test_for_two_hitting.png
+
     - div.page:
         - h1: Game Logistics Analysis and Implementation Issue (Cont.)
         - p: The nature of grid-based game--accuracy is in need.
         - p: Sychronization problem
         # TODO some screenshots needed
-        - img:
-            - img.span7[]:
-                - alt: "test_two_hitting_wall.jpg"
-                - src: img/test_for_two_hitting_wall.png
-
-
-
-
-
-
-
+        - img.span7[]:
+            - alt: "test_two_hitting_tail.jpg"
+            - src: img/test_for_two_hitting_tail.png
     - div.page:
         - h1: Game Logistics Analysis and Implementation Issue (Cont.)
-        - img:
+        - p: The nature of grid-based game--accuracy is in need.
+        - p: Sychronization problem
+        # TODO some screenshots needed
+        - img.span7[]:
+            - alt: "test_two_hitting_wall.jpg"
+            - src: img/test_for_two_hitting_wall.png
 
     - div.page:
         - h1: Analysis of cocos2d
@@ -113,7 +97,8 @@
 
     - div.page:
         - h1: General structure
-        # TODO a UML domain model
+        - img.span12[]:
+            - src: img/class_diagram.png
 
     - div.page:
         - h1: Input, Player and Snake

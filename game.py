@@ -10,6 +10,7 @@ from input import InputManager
 from events import EventManager, EventTypes
 from debug import dprint
 from gamerule import DeathModeRule
+from record import Recorder
 import gamerule
 import random
 import input
@@ -25,6 +26,7 @@ class Game:
     def __init__(self):
         self.inputMgr = InputManager()
         self.eventMgr = EventManager()
+        self.recorder = None
 
     def join_human_player(self, name, keyLayout):
         """
@@ -74,25 +76,33 @@ class Game:
             * rule: Optional. A tuple (Rule, args), where `Rule` is GameRule class, 
                     `args` is the arguments to instantiate this Rule.
                     Rule defaluts to DeathModeRule.
+            * n-food: Integer, how many food should the world have at a time.
+                    Default to 2.
 
             SnakeData: a tuple (headPos, direction, length)
             
         """
-        world = World(*configData['world-size'])
-        world.gen_food()
+        self.configData = configData
+        world = World(*configData['world-size'], eventMgr=self.eventMgr)
+        self.nFood = configData.get('n-food', config.DEFAULT_FOOD_NUM)
         self.snakeDatas = configData['snakes']
         self.world = world
+        # round count
+        self.round = 0
+        # setup rule
         if 'rule' in configData:
             Rule, args = configData['rule']
             rule = Rule(self.world, self.eventMgr, *args)
         else:
             rule = DeathModeRule(self.world, self.eventMgr)
         self.rule = rule
-
+        # setup display
         self.display = display
         # In display, the display should bind callbacks
         # to some game events.
         display.init(self)
+
+        self._needReset = True
 
     def bind_event(self, eventType, callback):
         """
@@ -116,17 +126,29 @@ class Game:
         FPS = config.FPS
         # update per second
         UPS = config.UPS
+
+        # generate food
+        for i in xrange(self.nFood):
+            self.world.gen_food()
         while not self._quit:
             # handle input
             self.inputMgr.update()
+            if self._quit: break
             # update game state
             if tickCount % (FPS/UPS) == 0:
                 # dprint('before update\n'+str(self.world.field))
+                if self.recorder: 
+                    self.recorder.update()
                 self.rule.update()
                 self.world.update(self.eventMgr)
+                self.round += 1
             # render using display
             self.display.render(self.world)
             timer.tick(FPS)
             tickCount += 1
+        # stop recorder 
+        if self.recorder: 
+            self.recorder.stop()
+            self.recorder.quit()
         self.display.quit()
         dprint('quit normally')

@@ -58,8 +58,10 @@ class SnakeEat(GameEvent):
 
 class SnakeMove(GameEvent):
     type = EventTypes.SNAKE_MOVE
-    def __init__(self, snake):
+    def __init__(self, snake, from_, to_):
         self.snake = snake
+        self.from_ = from_
+        self.to_ = to_
 
 class FoodGen(GameEvent):
     type = EventTypes.FOOD_GEN

@@ -144,7 +144,6 @@ class Display:
         # All kinds of snakes
         self.snakeAppearance = [
             'snake-red',
-            'snake-blue',
             'snake-purple',
             'snake-blue',
             ]

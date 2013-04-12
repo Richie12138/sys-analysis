@@ -5,6 +5,9 @@ from game import Game
 from grids import Directions
 from display import Display
 from player import HumanPlayer, AIPlayer, StupidAIPlayer, ProgramedPlayer
+from debug import dprint
+
+RUN_ALL = 0
 
 class TestBase(object):
     def __init__(self, configData):
@@ -17,9 +20,10 @@ class TestBase(object):
         pass
 
     def run(self, isRun):
-        if not isRun: return
+        if not (isRun or RUN_ALL): return
         game = self.game = Game()
         game.inputMgr.bind(input.key_down_type('q'), game.quit)
+        game.inputMgr.bind(input.key_down_type('z'), lambda e: exit(0))
         game.inputMgr.bind(input.key_down_type('p'), game.pause)
         self.display = Display()
         game.setup_stage(self.configData, self.display)
@@ -53,10 +57,11 @@ class test_two_looping(TestBase):
     def extra_config(self):
         self.game.join_player(ProgramedPlayer("Foo", 'rrrddllluu'))
         self.game.join_player(ProgramedPlayer("Bar", 'rrrddllluu'))
+        # self.game.bind_event(events.EventTypes.SNAKE_DIE, lambda e: dprint('round:', self.game.round))
 test_two_looping({
     'world-size': (20, 20), 'snakes':[
-        ((10, 5), Directions.RIGHT, 11),
         ((10, 15), Directions.RIGHT, 10),
+        ((10, 5), Directions.RIGHT, 11),
         ]}).run(0)
 
 ##################################################################
@@ -118,10 +123,79 @@ class test_two_AI(TestBase):
     def extra_config(self):
         self.game.join_player(AIPlayer("Alice"))
         self.game.join_player(AIPlayer("Bob"))
+        self.game.bind_event(events.EventTypes.SNAKE_DIE, lambda e: dprint('die:', self.game.world))
 test_two_AI({
+    'world-size': (10, 10), 'snakes':[
+            ((5, 9), Directions.RIGHT, 5), 
+            ((5, 8), Directions.RIGHT, 5), 
+        ]}).run(0)
+##################################################################
+class test_one_AI(TestBase):
+    def extra_config(self):
+        self.game.join_player(AIPlayer("Alice"))
+test_one_AI({
     'world-size': (15, 15), 'snakes':[
             ((10, 10), Directions.RIGHT, 5), 
-            ((9, 9), Directions.RIGHT, 5), 
         ]}).run(0)
 
-#TODO: add test_scoring_mode
+##################################################################
+class test_two_hitting_even(TestBase):
+    def extra_config(self):
+        self.game.join_player(ProgramedPlayer("S1", 'rrrdd'))
+        self.game.join_player(ProgramedPlayer("S2", 'rrruu'))
+test_two_hitting_even({
+        'world-size': (15, 15), 
+        'snakes':[ 
+            ((8, 8), Directions.RIGHT, 8), 
+            ((8, 11), Directions.RIGHT, 8), 
+            ((8, 12), Directions.RIGHT, 8), 
+            ],
+        'rule': (gamerule.ScoringModeRule, (100, )),
+        }).run(0)
+
+class test_two_hitting_odd(TestBase):
+    def extra_config(self):
+        self.game.join_player(ProgramedPlayer("S1", 'rrrdd'))
+        self.game.join_player(ProgramedPlayer("S2", 'rrruu'))
+test_two_hitting_odd({
+        'world-size': (15, 15), 
+        'snakes':[ 
+            ((8, 8), Directions.RIGHT, 8), 
+            ((8, 10), Directions.RIGHT, 8), 
+            ((8, 12), Directions.RIGHT, 8), 
+            ],
+        'rule': (gamerule.ScoringModeRule, (100, )),
+        }).run(0)
+
+##################################################################
+class test_one_AI(TestBase):
+    def extra_config(self):
+        self.game.join_player(AIPlayer("Alice"))
+test_one_AI({
+    'world-size': (10, 10), 'snakes':[
+            ((5, 5), Directions.RIGHT, 5), 
+        ]}).run(0)
+
+##################################################################
+class test_one_AI_large(TestBase):
+    def extra_config(self):
+        self.game.join_player(AIPlayer("Alice"))
+test_one_AI_large({
+    'world-size': (20, 20), 'snakes':[
+            ((5, 5), Directions.RIGHT, 5), 
+        ]}).run(0)
+
+##################################################################
+class test_many_AI(TestBase):
+    def extra_config(self):
+        for i in xrange(5):
+            self.game.join_player(AIPlayer("Foo-{}".format(i)))
+            # self.game.join_player(StupidAIPlayer("Foo-{}".format(i)))
+test_many_AI({
+    'world-size': (16, 16), 
+    'snakes':[((5, i*2), Directions.RIGHT, 5) for i in xrange(20)],
+    'n-food': 1,
+    # 'rule': (gamerule.ScoringModeRule, (5, )),
+    }).run(1)
+
+#TODO: add test case for ScoringModeRule

@@ -1,0 +1,169 @@
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>
+        Presentation
+        </title>
+        <link rel="stylesheet" href="css/bootstrap.min.css" />
+        <link rel="stylesheet" href="css/master.css" />
+        <script src="js/jquery-1.8.3.min.js" type="text/javascript">
+        </script>
+        <script src="js/bootstrap.min.js" type="text/javascript">
+        </script>
+    </head>
+    <body>
+        <script src="js/master.js" type="text/javascript">
+        </script>
+        <div class="page cover">
+            <h1>
+            Analysis and Design for the Greedy Snake Game
+            </h1>
+            <table class="table table-striped">
+                <tr>
+                    <th>
+                    Project
+                    </th>
+                    <td>
+                    蜡笔土豆(Crayon Snake)
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                    Date
+                    </th>
+                    <td>
+                    12 April 2013
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                    Members
+                    </th>
+                    <td>
+                    区展明 杨帆 梁展瑞 李冠贤
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="page">
+            <h1>
+            Game Logistics Analysis and Implementation Issue
+            </h1>
+            <ul>
+                <li>
+                Representation of every Game element(E.g, use a matrix to represent a stage, and a list of (x, y) tuple to represent the body of a snake.)
+                </li>
+                <li>
+                Display/Logistics Relationship
+                </li>
+                <li>
+                Synchronization(Show be handled with care.)
+                </li>
+            </ul>
+        </div>
+        <div class="page">
+            <h1>
+            Game Logistics Analysis and Implementation Issue (Cont.)
+            </h1>
+            <p>
+            The nature of grid-based game--accuracy is in need.
+            </p>
+            <p>
+            Sychronization problem
+            </p>
+        </div>
+        <div class="page">
+            <h1>
+            Analysis of cocos2d
+            </h1>
+            <h3>
+            Sychronization
+            </h3>
+            <p>
+            It lacks sychronizing mechanism such as locks and semaphore.
+            </p>
+            <h3>
+            Event system
+            </h3>
+            <p>
+            We don't know how cocos2d handles events. Does it handle all events at the end of the main loop? Or right at the time stamp where the event occur?
+            </p>
+            <h3>
+            Coupling in Logistics and Display
+            </h3>
+            <p>
+            The sprites class.
+            </p>
+            <p>
+            As for the problems above, we decided to develop a new game engine suitable for running grid-based game.
+            </p>
+        </div>
+        <div class="page">
+            <h1>
+            General structure
+            </h1>
+        </div>
+        <div class="page">
+            <h1>
+            Input, Player and Snake
+            </h1>
+        </div>
+        <div class="page">
+            <h1>
+            World and Event System
+            </h1>
+            <h3>
+            World
+            </h3>
+            <p>
+            In every loop, world generally update all players, all snakes, and then try to resolve locks. If it fails, those who haven't aquire locks should get eliminated.
+            </p>
+            <h3>
+            Event
+            </h3>
+            <p>
+            Module A emit an event, and module B, C, D act correspondingly according to predefined binding. By so, coupling among A, B, C and D are mitigated.
+            </p>
+        </div>
+        <div class="page">
+            <h1>
+            The Display module
+            </h1>
+            <h3>
+            Textures
+            </h3>
+            <p>
+            The Factory design pattern is very suitable. For every name, just register a suitable image or movieclip.
+            </p>
+            <pre>
+imageFactory.register("grid-food", "img/grid-food.png")
+            </pre>
+            <p>
+            To use that image, simply invoke
+            </p>
+            <pre>
+imageFactory.get("grid-food")
+            </pre>
+            <h3>
+            Layer System
+            </h3>
+            <p>
+            To place items with different depths.
+            </p>
+            <p>
+            Adopts the Iterator design pattern, which help rendering all items in different layers according to their depths.
+            </p>
+            <h3>
+            MovieClips, Colors, etc.
+            </h3>
+        </div>
+        <div class="page">
+            <h1>
+            Show Time
+            </h1>
+            <h3>
+            Thanks everyone in advance
+            </h3>
+        </div>
+    </body>
+</html>

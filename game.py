@@ -16,6 +16,7 @@ import random
 import input
 import events
 import pygame
+import menu
 import config
 
 if config.FAKE_RANDOM:
@@ -23,10 +24,17 @@ if config.FAKE_RANDOM:
 
 class Game:
     # TODO: doc
+    ST_MENU = 'menu'
+    ST_GAMEPLAY = 'gameplay'
+    ST_PAUSE = 'pause'
+
     def __init__(self):
-        self.inputMgr = InputManager()
+        self.inputMgr = InputManager.get_instance()
         self.eventMgr = EventManager()
         self.recorder = None
+
+        self.state = self.ST_MENU
+        self.rootMenu = None
 
     def join_human_player(self, name, keyLayout):
         """
@@ -82,6 +90,7 @@ class Game:
             SnakeData: a tuple (headPos, direction, length)
             
         """
+        assert self.state in self.ST_MENU
         self.configData = configData
         world = World(*configData['world-size'], eventMgr=self.eventMgr)
         self.nFood = configData.get('n-food', config.DEFAULT_FOOD_NUM)
@@ -114,9 +123,20 @@ class Game:
 
     def quit(self, *args):
         self._quit = True
+        self.state = self.ST_MENU
 
     def pause(self, event):
-        self.world.pause = not self.world.pause
+        pause = self.world.pause = not self.world.pause
+        if self.state == self.ST_GAMEPLAY:
+            self.state = self.ST_PAUSE
+        elif self.state == self.ST_PAUSE:
+            self.state = self.ST_GAMEPLAY
+
+    def start(self):
+        assert self.state in self.ST_MENU
+        for i in xrange(self.nFood):
+            self.world.gen_food()
+        self.end_prepare()
 
     def mainloop(self):
         self._quit = False
@@ -128,20 +148,21 @@ class Game:
         UPS = config.UPS
 
         # generate food
-        for i in xrange(self.nFood):
-            self.world.gen_food()
         while not self._quit:
             # handle input
             self.inputMgr.update()
             if self._quit: break
-            # update game state
-            if tickCount % (FPS/UPS) == 0:
-                # dprint('before update\n'+str(self.world.field))
-                if self.recorder: 
-                    self.recorder.update()
-                self.rule.update()
-                self.world.update(self.eventMgr)
-                self.round += 1
+            if self.state == self.ST_GAMEPLAY:
+                # update game state
+                if tickCount % (FPS/UPS) == 0:
+                    dprint('before update\n'+str(self.world.field))
+                    if self.recorder: 
+                        self.recorder.update()
+                    self.rule.update()
+                    self.world.update(self.eventMgr)
+                    self.round += 1
+            elif self.state == self.ST_MENU:
+                if self.rootMenu: self.rootMenu.game_update()
             # render using display
             self.display.render(self.world)
             timer.tick(FPS)
@@ -152,3 +173,13 @@ class Game:
             self.recorder.quit()
         self.display.quit()
         dprint('quit normally')
+
+    def end_prepare(self):
+        assert self.state == self.ST_MENU
+        self.state = self.ST_GAMEPLAY
+
+if __name__ == '__main__':
+    display = Display()
+    game = Game()
+    rootMenu = menu.RootMenu(game, display)
+    game.mainloop()

@@ -3,6 +3,7 @@ import world
 import grids
 import imageUtils
 import random
+import config
 from snake import Snake
 from events import EventTypes
 from debug import dprint
@@ -104,7 +105,7 @@ class Effect:
         if self.cd <= 0: layerStack.delete(self)
 
 class Display:
-    def __init__(self, width=600, height=600):
+    def __init__(self, width=config.SCREEN_W, height=config.SCREEN_H):
         """
         Initialize display.
         @width: width of the stage
@@ -303,9 +304,12 @@ class Display:
         The object should provide renderX and renderY.
         """
         blit = self.window.blit
-        g = self.imageFactory.get_image
-        blit(g(objToRender.name),
-            (objToRender.renderX, objToRender.renderY))
+        if hasattr(objToRender, 'image') and hasattr(objToRender, 'rect'):
+            blit(objToRender.image, objToRender.rect)
+        else:
+            g = self.imageFactory.get_image
+            blit(g(objToRender.name),
+                (objToRender.renderX, objToRender.renderY))
 
     def render_field(self, objToRender):
         """

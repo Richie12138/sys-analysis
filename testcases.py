@@ -7,7 +7,7 @@ from display import Display
 from player import HumanPlayer, AIPlayer, StupidAIPlayer, ProgramedPlayer
 from debug import dprint
 
-RUN_ALL = 0
+RUN_ALL = 1
 
 class TestBase(object):
     def __init__(self, configData):
@@ -29,8 +29,8 @@ class TestBase(object):
         game.setup_stage(self.configData, self.display)
 
         self.extra_config()
+        game.start()
         game.mainloop()
-
 
 ##################################################################
 class test_human(TestBase):
@@ -40,8 +40,9 @@ class test_human(TestBase):
         self.game.join_human_player("Bar", [K('i'), K('k'), K('j'), K('l')])
 test_human({
     'world-size': (20, 20),
-            'snakes':[ ((8, 8), Directions.RIGHT, 5), 
-                    ((7, 7), Directions.RIGHT, 5), 
+            'snakes':[ 
+                ((8, 8), Directions.RIGHT, 5), 
+                ((7, 7), Directions.RIGHT, 5), 
         ]}).run(0)
 ##################################################################
 class test_self_looping(TestBase):

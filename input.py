@@ -19,6 +19,13 @@ def key_up_type(keyName=None):
     return (pygame.KEYUP, key(keyName))
 
 class InputManager:
+    _instance = None
+    @staticmethod
+    def get_instance():
+        if InputManager._instance is None:
+            InputManager._instance = InputManager()
+        return InputManager._instance
+        
     def __init__(self):
         self._callbacks = {}
 

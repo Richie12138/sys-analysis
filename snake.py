@@ -39,6 +39,7 @@ class Snake(object):
         self.body = []
         self.direction = None
         self.alive = True
+        self._mark_die = False
 
     @property
     def head(self):
@@ -222,7 +223,13 @@ class Snake(object):
         @eventMgr: A eventMgr for emitting events.
 
         """
-        if not self.alive: return
+        if self._mark_die:
+            dprint('die. "Uuuuaaahhhh!!"'.format(self=self), "length: ", len(self.body))
+            self.set_body([])
+            self._mark_die = False
+            self.alive = False
+        if not self.alive: 
+            return
         nextPos = self.next_head_pos()
         grid = self.world.field.get_grid_at(*nextPos)
         if grid is None:
@@ -240,6 +247,4 @@ class Snake(object):
                     self.on_acquire_fail('blocked by others', grid.pos))
 
     def die(self):
-        dprint('die. "Uuuuaaahhhh!!"'.format(self=self), "length: ", len(self.body))
-        self.alive = False
-        self.set_body([])
+        self._mark_die = True

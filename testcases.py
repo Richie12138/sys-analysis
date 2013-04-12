@@ -168,13 +168,28 @@ test_two_hitting_odd({
         }).run(0)
 
 ##################################################################
+class test_two_hitting_wall(TestBase):
+    def extra_config(self):
+        self.game.join_player(ProgramedPlayer("S1", 'uuuuu'))
+        self.game.join_player(ProgramedPlayer("S2", 'lllll'))
+test_two_hitting_wall({
+        'world-size': (15, 15), 
+        'snakes':[ 
+            ((1, 1), Directions.UP, 8), 
+            ((3, 7), Directions.LEFT, 8), 
+            ],
+        'rule': (gamerule.ScoringModeRule, (100, )),
+        }).run(1)
+
+
+##################################################################
 class test_one_AI(TestBase):
     def extra_config(self):
         self.game.join_player(AIPlayer("Alice"))
 test_one_AI({
     'world-size': (10, 10), 'snakes':[
             ((5, 5), Directions.RIGHT, 5), 
-        ]}).run(1)
+        ]}).run(0)
 
 ##################################################################
 class test_one_AI_large(TestBase):
@@ -196,6 +211,6 @@ test_many_AI({
     'snakes':[((5, i*2), Directions.RIGHT, 5) for i in xrange(20)],
     'n-food': 1,
     # 'rule': (gamerule.ScoringModeRule, (5, )),
-    }).run(1)
+    }).run(0)
 
 #TODO: add test case for ScoringModeRule

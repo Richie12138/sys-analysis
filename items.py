@@ -6,7 +6,7 @@ class Item(object):
         return hash(self.pos)
 
 class Food(Item):
-    def __init__(self, pos, score=5):
+    def __init__(self, pos, score=1):
         self.score = score
         self.pos = pos
 

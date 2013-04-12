@@ -33,6 +33,7 @@ class Snake(object):
         """
         self.world = world
         self.player = player
+        self.name = None
 
         self.lastTail = None
         self.body = []
@@ -66,7 +67,8 @@ class Snake(object):
         self.set_body(positions)
 
     def __repr__(self):
-        return "Snake(name={self.player.name}, head={self.head})".format(self=self)
+        # return "Snake(name={self.player.name}, head={self.head})".format(self=self)
+        return "Snake(name={self.player.name}, body={self.body})".format(self=self)
 
     def set_body(self, positions):
         """
@@ -79,10 +81,8 @@ class Snake(object):
         # clear previous grids
         for bsec in self.body:
             grid = self.world.field.get_grid_at(*bsec.pos)
-            grid.type = grids.BLANK
-            grid.content = None
             if grid.lock.owner is self:
-                grid.lock.release(self)
+                grid.clear()
         self.body = []
         for pos in positions:
             bsec = BodySection(pos)
@@ -147,18 +147,17 @@ class Snake(object):
         # create the tail section
         tail = BodySection(self.body[-1].pos)
         tail.secID = len(self.body)
-        self.move_forward()
+        self.move_forward(eat=True)
+        self.body.append(tail)
         # allocate a grid for the tail
         tailGrid = self.world.field.get_grid_at(*tail.pos)
-        self.body.append(tail)
         tailGrid.type = grids.SNAKE
         tailGrid.content = tail
-        # dprint('eat')
+        dprint('eat')
         self.world.gen_food()
-        tailGrid.lock.acquire(self, None, None)
-        tailGrid.lock.update()
 
-    def move_forward(self):
+    def move_forward(self, eat=False):
+        # dprint(self.name, 'move forward')
         # update all bsec.pos by swapping
         #  before: [n] | [0] [1] [2] [3]
         #  swap 1: [0] | [n] [1] [2] [3]
@@ -173,18 +172,22 @@ class Snake(object):
         self.lastTail = self.body[-1]
         for bsec in self.body:
             grid = get_grid_at(*bsec.pos)
-            grid.type = grids.BLANK
-            grid.content = None
+            if grid.lock.owner is self:
+                # the grid may not own by self, due to breaking loop manually
+                # see: world.py -> World.update
+                grid.type = grids.BLANK
+                grid.content = None
 
+        for bsec in self.body:
             nextPos, bsec.pos = bsec.pos, nextPos
-
             grid = get_grid_at(*bsec.pos)
             grid.type = grids.SNAKE
             grid.content = bsec
         # now nextPos is the original tail pos
-        grid = get_grid_at(*nextPos)
-        if grid.lock.owner is self:
-            grid.lock.release(self)
+        if not eat:
+            grid = get_grid_at(*nextPos)
+            if grid.lock.owner is self:
+                grid.clear()
 
     def on_acquire_succeed(self):
         # dprint('before update:', self.positions)
@@ -240,29 +243,3 @@ class Snake(object):
         dprint('die. "Uuuuaaahhhh!!"'.format(self=self), "length: ", len(self.body))
         self.alive = False
         self.set_body([])
-
-if __name__ == '__main__':
-    def sep(title):
-        print('='*80)
-        print(title)
-        print('-'*80)
-    world = None
-    player = None
-
-    sep('test __init__')
-    snake = Snake(world, player)
-    print(snake)
-
-    sep('test gen body')
-    snake.gen_body((3, 0), Directions.LEFT, 3)
-    print(snake)
-
-    # sep('test moving')
-    # snake.update_direction(Directions.RIGHT)
-    # print('direction:', snake.direction)
-    # print('cur positions:', snake.positions)
-    # print('next positions:', snake.next_positions())
-    # snake.update_direction(Directions.DOWN)
-    # print('direction:', snake.direction)
-    # print('cur positions:', snake.positions)
-    # print('next positions:', snake.next_positions())

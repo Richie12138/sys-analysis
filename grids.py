@@ -7,6 +7,7 @@ Description:
 Author: Legend
 """
 import sync
+from debug import dprint
 
 # represent the grid status
 BLANK, SNAKE, FOOD, WALL = 0, 1, 2, 3
@@ -29,6 +30,15 @@ class Grid:
         self.content = None
         self.lock = sync.Lock()
         self.lock.pos = (x, y)
+
+    @property
+    def owner(self):
+        return self.lock.owner
+
+    def clear(self):
+        self.type = BLANK
+        self.content = None
+        self.lock.release(self.lock.owner)
 
     def __repr__(self):
         return 'Grid(pos={}, type={}'.format(self.pos, self.type)
@@ -84,13 +94,15 @@ class Field:
     def __repr__(self):
         def get_char(grid):
             if grid.type == SNAKE:
-                # return str(grid.content.secID)
-                if grid.content.secID == 1:
-                    return "H"
-                else:
-                    return 'S'
+                if grid.lock.owner is None:
+                    dprint(grid)
+                assert grid.lock.owner is not None
+                return str(grid.content.secID % 10)
+                # return 'SH'[grid.content.secID==0]
             elif grid.type == BLANK:
+                # dprint('gird', grid)
                 # return u'\u25A1'.encode('utf8')
+                assert grid.lock.owner is None
                 return '_'
             elif grid.type == FOOD:
                 return 'F'

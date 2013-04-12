@@ -19,4 +19,4 @@ def dprint(*args, **kwargs):
     modules = '->'.join(x for x in reversed(modules))
     # print('[{}]: '.format(modules), *args)
     # print('[{}]: '.format(modules), *args, file=_logFile)
-    print( *args, file=_logFile)
+    print(*args, file=_logFile)

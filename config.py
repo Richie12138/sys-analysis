@@ -1,6 +1,6 @@
 FPS = 60
 UPS = 60
-DEBUG = 0
+DEBUG = 1
 FAKE_RANDOM = 0 
 RECORD = 1
 RECORDER_DUMP_PATH = '.record.dat'

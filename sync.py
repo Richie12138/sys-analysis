@@ -15,11 +15,6 @@ class Lock:
                 len(self.waitingList))
 
     def acquire(self, target, on_succeed, on_fail):
-        # dprint("{} acquire for {}".format(target, self))
-        self.waitingList.append((target, on_succeed, on_fail))
-
-    def release(self, target):
-        # dprint("{} release {}".format(target, self))
         if config.PRINT_SYNC: dprint("{} acquire for {}".format(target, self))
         self.waitingList.append((target, on_succeed, on_fail))
 

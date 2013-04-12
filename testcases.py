@@ -7,7 +7,7 @@ from display import Display
 from player import HumanPlayer, AIPlayer, StupidAIPlayer, ProgramedPlayer
 from debug import dprint
 
-RUN_ALL = 1
+RUN_ALL = 0
 
 class TestBase(object):
     def __init__(self, configData):

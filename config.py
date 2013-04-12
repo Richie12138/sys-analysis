@@ -1,4 +1,5 @@
 FPS = 60
+# UPS = 1
 UPS = 60
 DEBUG = 1
 FAKE_RANDOM = 0 

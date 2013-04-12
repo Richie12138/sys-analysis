@@ -1,0 +1,84 @@
+- head:
+    - meta[]:
+        - charset: utf-8
+    - title: Presentation
+
+    - link[]:
+        - rel: stylesheet
+        - href: css/bootstrap.min.css
+    - link[]:
+        - rel: stylesheet
+        - href: css/master.css
+    - script[type=text/javascript, src=js/jquery-1.8.3.min.js]:
+    - script[type=text/javascript, src=js/bootstrap.min.js]:
+- body:
+    - script[type=text/javascript, src=js/master.js]:
+    - div.page.cover:
+        - h1: Analysis and Design for the Greedy Snake Game
+        - table.table.table-striped:
+            - tr:
+                - th: Project
+                - td: 蜡笔土豆(Crayon Snake)
+            - tr:
+                - th: Date
+                - td: 12 April 2013
+            - tr:
+                - th: Members
+                - td: 区展明 杨帆 梁展瑞 李冠贤
+
+    - div.page:
+        - h1: Game Logistics Analysis and Implementation Issue
+        - ul:
+            - li: Representation of every Game element(E.g, use a matrix to represent a stage, and a list of (x, y) tuple to represent the body of a snake.)
+            - li: Display/Logistics Relationship
+            - li: Synchronization(Show be handled with care.)
+
+    - div.page:
+        - h1: Game Logistics Analysis and Implementation Issue (Cont.)
+        - p: The nature of grid-based game--accuracy is in need.
+        - p: Sychronization problem
+        # TODO some screenshots needed
+
+    - div.page:
+        - h1: Analysis of cocos2d
+        - h3: Sychronization
+        - p: It lacks sychronizing mechanism such as locks and semaphore.
+        - h3: Event system
+        - p: We don't know how cocos2d handles events. Does it handle all events at the end of the main loop? Or right at the time stamp where the event occur?
+        - h3: Coupling in Logistics and Display
+        - p: The sprites class.
+        - p: As for the problems above, we decided to develop a new game engine suitable for running grid-based game.
+
+    - div.page:
+        - h1: General structure
+        # TODO a UML domain model
+
+    - div.page:
+        - h1: Input, Player and Snake
+        - p: Subclassed from the Player base class, there are four types of players, namely, HumanPlayer, AIPlayer, StupidAIPlayer, ProgrammedPlayer(Debug purpose)
+        - p: The input module adopts the Observer design pattern. Human Players subscribe from the input module, and once there comes a keydown event, a corresponding callback will be invoked.
+
+    - div.page:
+        - h1: World and Event System
+        - h3: World
+        - p: In every loop, world generally update all players, all snakes, and then try to resolve locks. If it fails, those who haven't aquire locks should get eliminated.
+        - h3: Event
+        - p: Module A emit an event, and module B, C, D act correspondingly according to predefined binding. By so, coupling among A, B, C and D are mitigated.
+
+    - div.page:
+        - h1: The Display module
+        - h3: Textures
+        - p: The Factory design pattern is very suitable. For every name, just register a suitable image or movieclip.
+        - pre:
+            imageFactory.register("grid-food", "img/grid-food.png")
+        - p: To use that image, simply invoke
+        - pre:
+            imageFactory.get("grid-food")
+        - h3: Layer System
+        - p: To place items with different depths.
+        - p: Adopts the Iterator design pattern, which help rendering all items in different layers according to their depths.
+        - h3: MovieClips, Colors, etc.
+
+    - div.page:
+        - h1: Show Time
+        - h3: Thanks everyone in advance!

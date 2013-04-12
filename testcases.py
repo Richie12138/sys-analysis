@@ -124,7 +124,7 @@ test_two_AI({
     'world-size': (10, 10), 'snakes':[
             ((5, 9), Directions.RIGHT, 5), 
             ((6, 9), Directions.RIGHT, 5), 
-        ]}).run(1)
+        ]}).run(0)
 ##################################################################
 class test_one_AI(TestBase):
     def extra_config(self):
@@ -170,7 +170,7 @@ class test_one_AI(TestBase):
 test_one_AI({
     'world-size': (10, 10), 'snakes':[
             ((5, 5), Directions.RIGHT, 5), 
-        ]}).run(0)
+        ]}).run(1)
 
 #
 

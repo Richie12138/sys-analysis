@@ -190,7 +190,7 @@ class AIPlayer(Player):
         # dprint (s)
         
         # XXX: bug here previously, pos[1] -> pos[0]
-        return True, fillNum, food_distance, fillGraph[self.snake.body[-1].pos[1]][self.snake.body[-1].pos[1]]
+        return True, fillNum, food_distance, fillGraph[self.snake.body[-1].pos[1]][self.snake.body[-1].pos[0]]
         # return (fillNum == blankNum) , fillNum, food_distance, fillGraph[self.snake.body[-1].pos]
 
     def update(self, world):
@@ -237,7 +237,11 @@ class AIPlayer(Player):
                     if len(self.enemySnakes) == 0:
                         choice = 9
                         if self.multipier>= 1.5:
-                            choice = 2
+                            choice = 3
+                        if self.multipier>= 2.0:
+                            choice = int(5 - self.multipier)
+                        if choice < 0:
+                            choice = 0
                     if random.randint(0,choice) == 0:
                         candidate = grid
                         distance = food_distance

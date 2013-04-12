@@ -142,10 +142,8 @@ class Display:
         self.renderCallbacks = {}
 
         # All kinds of snakes
-        self.snakeAppearance = [
-            'snake-red',
-            'snake-purple',
-            'snake-blue',
+        self.snakeHue = [
+            0, 40, 100, 199, 289, 250
             ]
 
         # Add field
@@ -180,7 +178,7 @@ class Display:
         r = self.imageFactory.register
         name = snake.name
         self.renderCallbacks[name] = self.render_snake
-        hue = random.choice(range(0, 360))
+        hue = self.snakeHue[self.layerStack.size_of('snakes')]
         appearance = 'snake-red'
         self.renderCallbacks[name+'-status'] = \
             self.render_status

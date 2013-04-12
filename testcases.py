@@ -7,7 +7,7 @@ from display import Display
 from player import HumanPlayer, AIPlayer, StupidAIPlayer, ProgramedPlayer
 from debug import dprint
 
-RUN_ALL = 0
+RUN_ALL = 1
 
 class TestBase(object):
     def __init__(self, configData):
@@ -174,7 +174,7 @@ class test_one_AI(TestBase):
 test_one_AI({
     'world-size': (10, 10), 'snakes':[
             ((5, 5), Directions.RIGHT, 5), 
-        ]}).run(1)
+        ]}).run(0)
 
 ##################################################################
 class test_one_AI_large(TestBase):

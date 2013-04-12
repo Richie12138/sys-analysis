@@ -5,14 +5,17 @@ def key(name):
     @return: a key constant specified by `@name`
     """
     try:
-        return getattr(pygame, 'K_{}'.format(name))
+        if name is None:
+            return None
+        else:
+            return getattr(pygame, 'K_{}'.format(name))
     except:
         raise Exception('unknown key: {}'.format(name))
 
-def key_down_type(keyName):
+def key_down_type(keyName=None):
     return (pygame.KEYDOWN, key(keyName))
 
-def key_up_type(keyName):
+def key_up_type(keyName=None):
     return (pygame.KEYUP, key(keyName))
 
 class InputManager:
@@ -44,13 +47,15 @@ class InputManager:
         Listen to the key event in the pygame.event
         """
         for e in pygame.event.get():
+            callbacks = []
             if e.type == pygame.KEYDOWN or e.type == pygame.KEYUP:
                 type = self.parse_event_type(e)
-                if self._callbacks.has_key(type):
-                    callbacks = self._callbacks[type]
+                if type in self._callbacks:
+                    callbacks += self._callbacks[type]
                     #call the event's corresponding callbacks
-                    for callback in callbacks:
-                        callback(e)
+                callbacks += self._callbacks.get((e.type, None), [])
+            for callback in callbacks:
+                callback(e)
 
 # Test
 # ================================

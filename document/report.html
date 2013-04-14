@@ -2,20 +2,21 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>系统分析与设计</title>
+<title>系统分析与设计lab1报告</title>
 <style type="text/css">
-.body   { width: 940px; margin: auto; }
-.title  { font-size: 24pt; color: #333; }
-.team   { font-size: 12pt; color: #5a5a5a; border-bottom: 2px solid; }
-.center { text-align: center; }
-h5      { text-align: center; font-size: 18pt; color: #d14; border-bottom: 2px solid #d14; }
-.keyword{ font-size: 12pt; color: #08c; }
+.body       { width: 940px; margin: auto; }
+.title      { color: #333; }
+.team       { font-size: 12pt; color: #5a5a5a; border-bottom: 2px solid; }
+.center     { text-align: center; }
+.subtitle   { text-align: center; font-size: 18pt; color: #d14; border-bottom: 2px solid #d14; }
+.keyword    { font-size: 12pt; color: #08c; }
 </style>
 </head>
 
 <body>
 <div class="body">
-<h2 class="center title">。 </h2>
+<h2 class="center title">系统分析与设计</h2>
+<h3 class="center title">实验一报告</h2>
 <p class="center team"> 
 小组成员： 
 李冠贤  10389043    　
@@ -23,135 +24,103 @@ h5      { text-align: center; font-size: 18pt; color: #d14; border-bottom: 2px s
 梁展瑞  10389084    　
 杨帆    10389048
 </p>
-题目：下载并使用虾米音乐和百度音乐手机App，你更喜欢哪个？ <br />
-请从产品Inception阶段的工作，分析并对比两个产品，然后回答下面问题： <br />
-（1）请用一组关键词，如搜索、排行、个性、发现、分享等等，分别tag两个产品。 <br />
-（2）请用简短的句子总结不同产品（包括服务对象，愿景，业务及价值）。 <span class="red">每个产品最多100字</span>。<br />
-（3）收集对比官方的产品特性列表。 <br />
-（4）请对比产品核心关注的用户与细分市场。请分别列出一些关键词表示产品用户的性格、行为、对音乐品质需求等特征。 <br />
-（5）虾米音乐有这样一个业务用例：“当用户首次登陆时，要求用户选择5各喜欢的歌手。”这个业务是否必要？如果有替代方法，你会怎么做？ <br />
-（6）请先陈述1－2个业务问题（需求），它可能是“当我听到一首好听的歌时，希望听该艺人的成名曲或该专辑其他歌。”然后，给出使用不同系统你解决该业务问题的过程。（注：类似的问题“自定义专辑用音乐分享我的心情”等等，但并不是所有应用都等能方便解决你收集问题） <br />
-（7）（选做）业务需求给不同stakeholders带来的价值或重要性评估是一件重要的工作（参见Scrum第二章相关内容）。（例如：随即播放：对用户是基本功能，重要但价值不大；带推荐的随机播放：对有些App很有价值，但不重要（锦上添花）。对有些App既不价值不大，也不重要。）缺乏有价值的业务需求，注定是将产生平庸的系统。<br />
-（8）根据团队对音乐App的了解，综合大家的意见，评选出三个最能打动你的功能。（提示，云不是功能是技术，它实现的功能时跨平台与设备共享）。并填写下面表格：</p>
-<table width="100%" border="1" cellspacing="0" cellpadding="0">
-  <tr>
-    <th scope="col">产品名称／版本</th>
-    <th scope="col">推荐功能名称</th>
-    <th scope="col">得分（推荐人数／总人数）</th>
-    <th scope="col">推荐理由</th>
-    <th scope="col">场景故事／问题与解决方案</th>
-  </tr>
-  <tr>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-  </tr>
-</table>
-<div class="keyword">
-    <h5> [1.关键词] </h5>
-    <p> 虾米音乐：发现、分享、个性、相似推荐、方便、社交、精选集</p>
-    <p> 百度音乐：大众、排行、搜索、简单、自在</p>
-</div>
-<div class="wordsum">
-    <h5> [2.简短句子总结] </h5>
-    <p> 虾米音乐：通过个性精选集、推荐相似、音乐社交等新鲜特别的业务来吸引更多想听音乐但又难以选择音乐的用户，增加分享乐趣的同时帮助他们找到合适的音乐，籍由这个方式让音乐离用户更近，成为全球第一的音乐服务提供商。</p>
-    <p> 百度音乐：着眼于完善基本播放相关功能，新歌榜、榜单、搜索、排行等业务让追寻新鲜或要求不高的用户随时随地免费享受音乐，最重要的是方便与快捷，让用户少一份等待，多一份享受。</p>
-</div>
-<div class="attrlist">
-    <h5> [3.特性列表] </h5>
+报告内容： <br />
+<p>［Part 1］团队成员工作总结。每个人的学号、姓名、个人贡献列表。<br />
+［Part 2］Task 2 程序的类图<br />
+［Part 3］回答 Task 3 任务的问题（1－4）<br />
+阅读&quot;<em><strong>Learn cocos2D Game Development with iOS 5</strong></em>&quot;第三章&quot;<em>Essentials</em>&quot;，<a name="d2" id="d2"></a>［<span class="blue">Discuss2</span>－UML and Technical Resource］回答以下问题（1－4）：<br />
+1）阅读P41，画一个UML类图表示 CCNode 与 CCSence、CCLayer、CCSprite概念之间的关系。文献中那句话给了你启发？<br />
+2）阅读P42-43，根据图3-3，用一个UML类图表示CCSence、CCLayer、CCSprite之间的关系。
+提示：<a href="http://en.wikipedia.org/wiki/Composite_pattern">Composite design pattern</a>（组合模式）是最关键的词，如果你了解一点<a href="http://zh.wikipedia.org/wiki/设计模式_(计算机)">软件设计模式</a>（<a href="http://en.wikipedia.org/wiki/Design_pattern_(computer_science)">Software design pattern</a>），你将更容易领会作者的意图，如层次的含义与实现。<br />
+3）
+阅读P5－47, 一个对象（myCCSprite），如僵尸在被子弹击中后，程序执行了 myCCSprite.runActtion(myCCBlink)语句，你认为这个僵尸将产生什么样的显示效果？用UML类图描述 CCNode 与 CCAction 之间的关系。（中级话题：显然，这时个典型的设计技术，它属于哪种设计模式？）<br />
+4） 
+阅读P51－56, 请问游戏系统框架中，谁（哪个对象）在管理 CCScence 的实例对象（或者说，游戏中每个场景的切换，调度是谁管理的）？解释&quot; The CCDirector class is a <a href="http://en.wikipedia.org/wiki/Singleton_pattern">singleton</a>（<a href="http://zh.wikipedia.org/wiki/单例模式">单实例模式</a>）&quot; (P51)的含义，并写出获取 CCDirector 类的对象实例的方法。<br />
+
+［Part 4］游戏 Domain Model &amp; Design Class Diagram <br />
+［part 5］回答以下问题：<br />
+1）复习教材 Chapter 1.6 &quot;What is the UML&quot;，结合你在实践中的经验，用自己的语言说明UML在项目中的作用。<br />
+2）根据你的观察，领域模型和设计类图都是类图，总结它们之间的区别。（参考：<a href="http://www.agilemodeling.com/artifacts/classDiagram.htm">Class Diagram </a>）<br />
+3）面向对象的应用程序开发API，通常架构以框架（Framework）形式提供（如cocos2d游戏框架），请述说 Framework(Archecture) 与 Function Library （程序库）之间的区别。<br />
+4）请根据项目经验，总结导致需求、设计发生变化的原因，什么阶段会产生这些变化。<br />
+［Part 6］你对这个案例的想法和建议。<br />
+［附件］可运行程序的源代码。</p>
+<div class="part1">
+    <h5 class="subtitle"> [Part1] </h5>
+    <p class="center">团队成员工作总结</p>
+    <p>李冠贤：</p>
+    <p>区展明：</p>
+    <p>梁展瑞：</p>
+    <p>杨帆：</p>
     <table width="100%" border="1" cellspacing="0" cellpadding="0">
       <tr>
-        <th rowspan="4">虾米音乐</th>
-        <td>收藏音乐：点击红心即可收藏，收藏越多，推荐越准。</td>
+        <th>姓名</th>
+        <th>学号</th>
+        <th>个人贡献列表</th>
+        <th>个人贡献百分比</th>
       </tr>
       <tr>
-        <td>离线播放：无网络时，也可流畅使用，不占用手机网络流量。</td>
+        <td>李冠贤</td>
+        <td>10389043</td>
+        <td>.</td>
+        <td>.</td>
       </tr>
       <tr>
-        <td>视听盛宴：虾米首创的视觉与听觉双感官感受。</td>
+        <td>区展明</td>
+        <td>10389003</td>
+        <td>.</td>
+        <td>.</td>
       </tr>
       <tr>
-        <td>手势操作：单手可完成全部操作，简单方便。</td>
+        <td>梁展瑞</td>
+        <td>10389084</td>
+        <td>.</td>
+        <td>.</td>
       </tr>
       <tr>
-        <th rowspan="6">百度音乐</th>
-        <td>百万首正版320kb超高品质歌曲无限量试听下载</td>
-      </tr>
-      <tr>
-        <td>我的音乐wifi下离线缓存，让您在无网情况下也能随时畅听</td>
-      </tr>
-      <tr>
-        <td>超炫的智能语音搜歌功能，解放您的双手</td>
-      </tr>
-      <tr>
-        <td>最权威的音乐榜单，最抢先的新歌速递</td>
-      </tr>
-      <tr>
-        <td>强大的云端同步功能，多端、多设备同步您喜爱的歌曲</td>
-      </tr>
-      <tr>
-        <td>播放界面全屏大图，给您更优质的视觉体验</td>
-      </tr>
-    </table>
-    <p>总结：由上述两个列表对比可以知道，百度音乐主要着眼于基本音乐功能的完善，流离于歌曲、播放、搜索等等基本满足找音乐、听音乐的享受要求;而虾米音乐着眼的不仅于前面说的基本满足需求，还有更多地加入了人的元素，使到听音乐亦有更高级的享受。</p>
-</div>
-<div class="feature">
-    <h5> [4.核心关注用户特征] </h5>
-    <p> 虾米：随意（非定向选择音乐）、追求高质量音乐、常听音乐（无网可以听）、喜欢听音乐并喜欢唱歌、有点懒（或者说有点忙）、喜欢听某一类艺人的音乐（从推荐相似艺人歌曲中得出）、追求潮流的年轻人。总的来说，虾米核心关注的用户是真正喜欢音乐懂得音乐的人群。</p>
-    <p> 百度：追求高品质音乐、喜欢听新歌、对歌曲数量的需求大、常听音乐（无网可以听）、有点懒或比较忙、追潮流刺激的年轻人或对音乐质素（不是指软性品质）要求高（关注音乐榜）。总的来说，百度核心关注的用户是追求潮流的年轻人群体。</p>
-</div>
-<div class="usecase">
-    <h5> [5.虾米业务用例] </h5>
-    <p> 不一定需要，但是于虾米来说有一定的好处。首先虾米最大的特点就是“发现音乐”，随意地发现好的音乐，如果固定地选择了5个喜欢的歌手的话，则可能会被认为与虾米的特点相违。其实不然，当用户选择了5个喜欢的歌手之后，虾米会给用户推荐相似的歌手，那么选择喜欢的歌手其实就是为了更加个性化的“发现”音乐而已。
-    如果有替代方法，我会在用户首次登陆时，要求用户选出喜欢的音乐风格（不限个数），例如乡村风格、朋克风等，以此来知道用户的喜好并向用户推荐音乐，让用户“发现”能够迎合自己风格的不同歌曲。</p>
-</div>
-<div class="solve">
-    <h5> [6.补充业务需求与实现] </h5>
-    <table width="100%" border="1" cellspacing="0" cellpadding="0">
-      <tr>
-        <th>补充业务需求</th>
-        <th>解决方案</th>
-      </tr>
-      <tr>
-        <td>1.当我听到一首好听的歌时，希望知道和我同样喜欢听这首歌的人听哪些歌或哪些歌手的歌，能一起分享、交流。</td>
-        <td>手机loop（即和网友或朋友更加直接地分享音乐）。手机上没有不过网页版的有。</td>
+        <td>杨帆</td>
+        <td>10389048</td>
+        <td>.</td>
+        <td>.</td>
       </tr>
      </table> 
 </div>
-<div class="sum">
-    <h5> [8.综合意见] </h5>
-    <table width="100%" border="1" cellspacing="0" cellpadding="0">
-      <tr>
-        <th scope="col">产品名称／版本</th>
-        <th scope="col">推荐功能名称</th>
-        <th scope="col">得分（推荐人数／总人数）</th>
-        <th scope="col">推荐理由</th>
-        <th scope="col">场景故事／问题与解决方案</th>
-      </tr>
-      <tr>
-        <td>虾米音乐（iPhone）V1.6.2</td>
-        <td>随便听听</td>
-        <td>4/4</td>
-        <td>虾米通过对用户爱好的识别（但用户不会意识到虾米已对其进行识别，使得用户错觉地认为虾米能够刚好猜中他的心思）来推荐符合用户爱好的歌曲。</td>
-        <td>当你苦闷于找不到合心意的新歌的时候，虾米刚好能给你推荐合意的歌曲，那种喜悦难以言明啊</td>
-      </tr>
-      <tr>
-        <td>百度音乐盒（iPhone）V3.2.0</td>
-        <td>无网缓存</td>
-        <td>3/4</td>
-        <td>无网的时候都可以听歌，并且有图有歌词，缓存可以手动清除。（与虾米相比，虾米无图无歌词）</td>
-        <td>当你离开有wifi的地方或者手机流量已经用完的时候想听歌，而这个功能正好能满足你当时的需求。</td>
-      </tr>
-      <tr>
-        <td>百度音乐盒（iPhone）V3.2.0</td>
-        <td>语音搜索</td>
-        <td>2/4</td>
-        <td>节省用户时间，搜歌的同时还可以进行其他活动。</td>
-        <td>当你不好按手机的时候，而语音搜索功能就正好满足了你的需求。</td>
-      </tr>
-    </table>
+<div class="part2">
+    <h5 class="subtitle"> [Part2] </h5>
+    <img class="center" src="init_diagram.png"/>
+</div>
+<div class="part3">
+    <h5 class="subtitle"> [Part3] </h5>
+    <p>答：</p>
+    <ul>
+      <li>1)</li>
+      <li>2)</li>
+      <li>3)</li>
+      <li>4)</li>
+    </ul>
+</div>
+<div class="part4">
+    <h5 class="subtitle"> [Part4] </h5>
+    <p class="center">domain_model</p>
+    <p class="center">design_class_diagram</p>
+    <img class="center" src="design_class_diagram.png" width="940" height="600"/>
+</div>
+<div class="part5">
+    <h5 class="subtitle"> [Part5] </h5>
+    <p>答：</p>
+    <ul>
+      <li>1)</li>
+      <li>2)</li>
+      <li>3)</li>
+      <li>4)</li>
+    </ul>
+</div>
+<div class="part6">
+    <h5 class="subtitle"> [Part6] </h5>
+    <p>想法和建议:</p>
+</div>
+<div class="addition">
+    <h5 class="subtitle"> [附件] </h5>
 </div>
 </div>
 </body>
